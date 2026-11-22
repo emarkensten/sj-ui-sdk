@@ -46,12 +46,12 @@ KB byter läge med MUI:s `ThemeProvider`. sj-ui har ingen provider: färgerna f�
 
 **Det jag tror på:** UI SDK som beteendelager under nästa major av KB:s komponenter, framför allt de komplexa (Select, DatePicker, Dialog, Menu) där RFC:n tänker behålla MUI. Det är där tillgänglighetsarbetet sitter, och där en stilmotor inte hjälper. Med CSS per komponent behövs stilmotorn bara för `sx` i legacy. Samma beteende finns för Web Components, vilket kan förena Stencil- och React-spåren.
 
-**Siffror (samma fem komponenter, gzip, utan React):** KB 303 kB JS (194 kB utan tågbilder), sj-ui 93 kB JS + 7 kB CSS. `npm run size` i `apps/storybook`.
+**Siffror (samma fem komponenter, gzip, utan React):** KB 303 kB JS (194 kB utan tågbilder), sj-ui 166 kB JS (104 kB utan tågbilder) + 12 kB CSS. Allt uppmätt står i [matdata.md](matdata.md).
 
 **Risker:**
 - Beta (0.1.0-beta.13) och tredjepartsberoende, samma invändning som RFC:n har mot Base UI. Lindring: låst version, kapsling (princip 4), Apache-2.0 tillåter fork.
 - Kräver React 19.
-- Inte granskat med skärmläsare (VoiceOver, TalkBack, NVDA). Bara tangentbord och tillgänglighetsträd.
+- Skärmläsare: DatePicker läser som KB i VoiceOver/Safari. Select säger "text" i stället för "markerad" när listan öppnas (felsöks). TalkBack och NVDA är inte provade.
 - Fem av 192 komponenter. Nästlade komponenter (route-description, journey-summary, data-grid) är inte provade, och det var där Lovable-försöket gick sönder.
 
-**Nästa steg om teamet vill gå vidare:** skärmläsartest av Select och DatePicker, en nästlad komponent (journey-summary), och en paritetsmätning av computed styles i alla lägen (ljust, mörkt, högkontrast, forced-colors).
+**Nästa steg om teamet vill gå vidare:** rätta Selects VoiceOver-text, en nästlad komponent (journey-summary), paritet i högkontrast och forced colors, och TalkBack och NVDA.

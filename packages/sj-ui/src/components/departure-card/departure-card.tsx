@@ -237,30 +237,52 @@ export function DepartureCard({
   const pointsText = hasPoints ? `${amount(points, "sv", "SEK")} p` : "";
   const durationText = `${copy.travelTime} ${formatDuration(dur, lang, copy).replace(/(\d) /g, "$1 ")}, ${changes} ${base.changesWord(changes)}`;
 
+  // The spoken sentence follows KB's ScreenReaderOnlyDepartureCard word for word, including its
+  // commas and the train number from `id`. Two deliberate differences: times are read in
+  // `timeZone` (KB reads the browser's), and the price in its own currency (KB always says kronor).
   const spokenPrice = () => {
     if (priceLoading) return copy.loadingPrice;
-    const parts = [hasPrice ? `${amount(price, lang, currency)} ${suffixSpoken}` : null, hasPoints ? `${amount(points, "sv", "SEK")} ${base.pointsSr}` : null].filter(Boolean);
+    const both = hasPrice && hasPoints;
+    const parts = [hasPrice ? `${amount(price, lang, currency)} ${suffixSpoken}` : "", hasPoints ? `${both ? "+ " : ""}${amount(points, "sv", "SEK")} ${base.pointsSr}` : ""].filter(Boolean);
     const intro = pricePrefix === "add" || pricePrefix === "addFrom" ? "" : `${base.priceSr} `;
-    return `${intro}${prefixSpoken ? `${prefixSpoken} ` : ""}${parts.join(" + ")}`;
+    return `${intro}${prefixSpoken ? `${prefixSpoken} ` : ""}${parts.join(" ")}`;
   };
+  const statusSpoken = (copy.status as Record<string, string | undefined>)[availability];
+  const availabilitySpoken = statusSpoken ?? (showPriceObject || priceLoading ? spokenPrice() : "");
+  const [priceText1, priceText2] = priceTexts.map((p) => p.text);
+  const comfortSpoken = priceLoading && comfort
+    ? `${copy.loadingComfort},`
+    : availableComfort.some((c) => !c.soldOut)
+      ? `${copy.classAvailable}${availableComfort.filter((c) => !c.soldOut).map((c) => copy.comfort[c.category]).join(", ")},`
+      : "";
+  const transportSpoken = singleLeg
+    ? `${base.operatedBy} ${[
+        transportations[0].producer,
+        transportations[0].productName,
+        transportations[0].serviceBrandName,
+        transportations[0].transportMethodDescription ? `${transportations[0].transportMethodDescription.toLowerCase()} ${transportations[0].id}` : transportations[0].id,
+      ].filter(Boolean).join(", ")}`
+    : transportations.length
+      ? `${base.first} ${transportations
+          .map((tr) => [tr.transportMethod && tr.transportMethod !== "TRAIN" && tr.transportMethodDescription ? `${tr.transportMethodDescription},` : "", tr.producer, tr.productName, tr.serviceBrandName].filter(Boolean).join(" "))
+          .join(`, ${base.then} `)}`
+      : "";
+  const symbolsSpoken = singleLeg && amenities.length ? `${base.symbols} ${joinList(amenities.map((a) => base.amenity[a] ?? a), lang)}` : "";
+  const captionSpoken = caption ? (caption.srText ?? `${caption.text},`) : "";
   const spoken = [
-    caption ? (caption.srText ?? caption.text) : null,
-    `${base.departs} ${depTime}`,
-    `${base.arrives} ${arrTime}`,
-    statusText ?? (showPriceObject || priceLoading ? spokenPrice() : null),
-    ...priceTexts.map((p) => p.text),
-    spokenDuration(dur, lang),
-    base.changes(changes),
-    priceLoading && availableComfort.length ? copy.loadingComfort : null,
-    !priceLoading && availableComfort.some((c) => !c.soldOut)
-      ? `${copy.classAvailable}${availableComfort.filter((c) => !c.soldOut).map((c) => copy.comfort[c.category]).join(", ")}`
-      : null,
-    `${base.operatedBy} ${transportations.map((tr) => [tr.producer, tr.productName].filter(Boolean).join(" ")).join(`, ${base.then} `)}`,
-    shownAmenities.length ? `${base.symbols} ${joinList(shownAmenities.map((a) => base.amenity[a]), lang)}` : null,
-    badge?.label,
+    captionSpoken,
+    `${copy.departureTime} ${depTime},`,
+    `${copy.arrivalTime} ${arrTime},`,
+    `${availabilitySpoken ? `${availabilitySpoken},` : ""}${priceText1 ? ` ${priceText1}, ${priceText2 ? `${priceText2}, ` : ""}` : ""}`,
+    `${spokenDuration(dur, lang)},`,
+    `${changes} ${base.changesWord(changes)},`,
+    comfortSpoken,
+    transportSpoken,
+    `${symbolsSpoken ? `, ${symbolsSpoken}` : ""}${badge?.label ? `, ${badge.label}` : ""}`,
   ]
-    .filter(Boolean)
-    .join(", ");
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   // KB moves the transport details and the classes between sizes; each placement is rendered and CSS shows one.
   const details = (at: "small" | "medium" | "large") => (
@@ -374,7 +396,12 @@ export function DepartureCard({
     </span>
   );
   // Inside the click area and read out after the card, like KB's children.
-  const footerEl = footer && <span className="sj-departure-card__footer sj-departure-card__dim">{footer}</span>;
+  const footerEl = footer && (
+    <span className="sj-departure-card__footer sj-departure-card__dim">
+      <span className="sj-visually-hidden">. </span>
+      {footer}
+    </span>
+  );
 
   return (
     <div
