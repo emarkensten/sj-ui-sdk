@@ -37,7 +37,7 @@ export const components = {
       "Öppna kalendern och stäng med Esc": ["Tab", "Tab", "Enter", "Escape"],
       "Tab genom öppen kalender": ["Tab", "Tab", "Enter", "Tab", "Tab", "Tab"],
     },
-    vo: { stories: ["Standard", "Fel (errorHelperText)"], keys: ["VO:next", "VO:act", "ArrowRight", "Enter"] },
+    vo: { stories: ["Standard", "Fel"], keys: ["VO:next", "VO:act", "ArrowRight", "Enter"] },
   },
   DepartureCard: {
     flows: { "Tab, Enter, Tab": ["Tab", "Enter", "Tab"] },

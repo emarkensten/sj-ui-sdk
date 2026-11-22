@@ -89,7 +89,10 @@ export function compareVo(entries) {
     const kb = p.kb, sj = p.sj;
     if (!kb || !sj) return { ...p, status: "red", readDiff: [], keyDiffs: [] };
     const readDiff = diff(kb.read, sj.read);
-    const keyDiffs = kb.keys.map((k, i) => ({ key: k.key, kb: k.spoken, sj: sj.keys[i]?.spoken ?? [], same: JSON.stringify(k.spoken) === JSON.stringify(sj.keys[i]?.spoken ?? []) }));
+    // Compare what VoiceOver says for the item under its cursor after each step. The spoken log is
+    // shown too, but whether a short announcement ("markerad") lands in it depends on timing.
+    const said = (k) => (k?.cursor ? [k.cursor] : (k?.spoken ?? []).map((p) => p.replace(/^\[VO-markören\] /, "")));
+    const keyDiffs = kb.keys.map((k, i) => ({ key: k.key, kb: said(k), sj: said(sj.keys[i]), same: JSON.stringify(said(k)) === JSON.stringify(said(sj.keys[i])) }));
     const outside = [kb, sj].filter((e) => e.keys.some((k) => k.outsidePage)).map((e) => (e.side === "kb" ? "KB" : "sj-ui"));
     const error = kb.error || sj.error || (outside.length ? `Tangenterna hamnade i Safaris gränssnitt (${outside.join(", ")}), inte i sidan` : null);
     const status = error ? "red" : changed(readDiff) || keyDiffs.some((k) => !k.same) ? "orange" : "green";
