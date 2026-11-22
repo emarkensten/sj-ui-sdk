@@ -19,12 +19,13 @@ export function LegacyPage() {
       <DatePicker id="outward" label="Utresa" value="2026-11-24" onAccept={() => {}} timeZone="Europe/Stockholm" />
       <FormControlLabel label="Visa bara direkttåg" control={<Switch name="direct" />} />
       <DepartureCard
-        departureDate="2026-11-24T07:10:00+01:00"
-        arrivalDate="2026-11-24T10:05:00+01:00"
+        departureDate={new Date("2026-11-24T07:10:00+01:00")}
+        arrivalDate={new Date("2026-11-24T10:05:00+01:00")}
         duration={{ days: "", hours: "2", minutes: "55" }}
         transportations={[leg]}
         transportInformations={[{ code: "BISTRO" }]}
         showPrice
+        showPoints={false}
         price={495}
         timeZone="Europe/Stockholm"
         lang="sv"
