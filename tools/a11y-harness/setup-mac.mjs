@@ -9,7 +9,7 @@ const run = (cmd, args) => {
   const r = spawnSync(cmd, args, { stdio: "inherit" });
   if (r.status !== 0) console.log(`(avslutades med ${r.status}, fortsätter)`);
 };
-run("npx", ["playwright", "install", "webkit"]);
+run("npx", ["playwright", "install", "webkit", "chromium"]);
 if (process.platform === "darwin") {
   run("npx", ["--yes", "@guidepup/setup", "setup"]);
   run("npx", ["--yes", "@guidepup/setup", "install"]);

@@ -90,7 +90,8 @@ export function compareVo(entries) {
     if (!kb || !sj) return { ...p, status: "red", readDiff: [], keyDiffs: [] };
     const readDiff = diff(kb.read, sj.read);
     const keyDiffs = kb.keys.map((k, i) => ({ key: k.key, kb: k.spoken, sj: sj.keys[i]?.spoken ?? [], same: JSON.stringify(k.spoken) === JSON.stringify(sj.keys[i]?.spoken ?? []) }));
-    const error = kb.error || sj.error;
+    const outside = [kb, sj].filter((e) => e.keys.some((k) => k.outsidePage)).map((e) => (e.side === "kb" ? "KB" : "sj-ui"));
+    const error = kb.error || sj.error || (outside.length ? `Tangenterna hamnade i Safaris gränssnitt (${outside.join(", ")}), inte i sidan` : null);
     const status = error ? "red" : changed(readDiff) || keyDiffs.some((k) => !k.same) ? "orange" : "green";
     return { ...p, readDiff, keyDiffs, status, error };
   });

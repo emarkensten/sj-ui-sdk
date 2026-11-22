@@ -55,6 +55,31 @@ function safari(url) {
 
 const vokey = (k) => (k === " " ? "Space" : k);
 const tidy = (s) => (s ?? "").replace(/\s+/g, " ").trim();
+// VoiceOver's name for the page area in Safari, in Swedish or English.
+const WEB_AREA = /webbinnehåll|web content|html[- ]innehåll|html content/i;
+// Phrases that come from Safari's own interface, not from the page.
+const SAFARI_UI = /verktygsfält|toolbar|avdelare|splitter|flikfält|tab bar|adressfält|smart search|sidofält|sidebar/i;
+
+/**
+ * Open the story and put VoiceOver inside the page: step through Safari's interface until VoiceOver
+ * reaches the web content, then interact with it (VO-Shift-Down). Returns false if it never got there.
+ */
+async function enterPage(voiceOver, macOSActivate, url) {
+  safari(url);
+  await sleep(2500);
+  await macOSActivate("Safari");
+  await sleep(300);
+  for (let i = 0; i < 12; i++) {
+    const phrase = tidy(await voiceOver.lastSpokenPhrase());
+    if (WEB_AREA.test(phrase)) {
+      await voiceOver.interact();
+      await sleep(400);
+      return true;
+    }
+    await voiceOver.next();
+  }
+  return false;
+}
 
 export async function runVoiceOver({ base, targets, log = console.log }) {
   if (process.platform !== "darwin") throw new Error("VoiceOver finns bara på macOS.");
@@ -69,32 +94,30 @@ export async function runVoiceOver({ base, targets, log = console.log }) {
         log(`  VoiceOver: ${t.component} / ${t.story.name} / ${side}`);
         const entry = { component: t.component, story: t.story.name, side, url, read: [], keys: [], error: null };
         try {
-          // 1. Read the component from the start, item by item.
-          safari(url);
-          await sleep(2500);
-          await macOSActivate("Safari");
-          await voiceOver.clearSpokenPhraseLog();
+          // 1. Read the component from the start, item by item (empty phrases skipped).
+          if (!(await enterPage(voiceOver, macOSActivate, url))) throw new Error("VoiceOver nådde inte sidans innehåll (fastnade i Safaris gränssnitt).");
           let same = 0;
           for (let i = 0; i < MAX_READ; i++) {
             await voiceOver.next();
             const phrase = tidy(await voiceOver.lastSpokenPhrase());
-            if (phrase === entry.read.at(-1)) {
-              if (++same >= 2) break;
+            if (!phrase) continue;
+            if (phrase === entry.read.at(-1) || SAFARI_UI.test(phrase)) {
+              if (++same >= 2) break; // End of the page: VoiceOver repeats the last item.
               continue;
             }
             same = 0;
             entry.read.push(phrase);
           }
+          if (!entry.read.length) throw new Error("VoiceOver läste ingenting inne på sidan.");
           // 2. Fresh page, then the keyboard flow: everything VoiceOver says after each key.
-          safari(url);
-          await sleep(2500);
-          await macOSActivate("Safari");
+          if (!(await enterPage(voiceOver, macOSActivate, url))) throw new Error("VoiceOver nådde inte sidans innehåll inför tangentbordsflödet.");
           for (const key of t.keys) {
             await voiceOver.clearSpokenPhraseLog();
             await voiceOver.press(vokey(key));
             await sleep(900);
-            const spoken = (await voiceOver.spokenPhraseLog()).map(tidy).filter(Boolean);
-            entry.keys.push({ key: key === " " ? "Space" : key, spoken: spoken.length ? spoken : [tidy(await voiceOver.lastSpokenPhrase())] });
+            let spoken = (await voiceOver.spokenPhraseLog()).map(tidy).filter(Boolean);
+            if (!spoken.length) spoken = [tidy(await voiceOver.lastSpokenPhrase())].filter(Boolean);
+            entry.keys.push({ key: vokey(key), spoken, outsidePage: spoken.some((p) => SAFARI_UI.test(p)) });
           }
         } catch (e) {
           entry.error = e.message.split("\n")[0];
