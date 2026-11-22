@@ -363,7 +363,8 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
           className="sj-legacy-cal-popup"
           data-weeks={hasWeekNumbers || undefined}
           data-presentation={presentation}
-          aria-label={mobile ? copy.dateFieldLabel : undefined}
+          // KB's sheet is a dialog named "Datum", not after the field's button.
+          aria-labelledby={mobile ? `${id}-sheet-title` : undefined}
           anchor={anchor ?? undefined}
           side="bottom"
           align="center"
@@ -375,6 +376,7 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
           style={props.zIndexCalendar ? { zIndex: props.zIndexCalendar } : undefined}
           {...customAttr(customAttribute)}
         >
+          {mobile && <span id={`${id}-sheet-title`} hidden>{copy.dateFieldLabel}</span>}
           {mobile && <PopoverClose className="sj-visually-hidden">{copy.close}</PopoverClose>}
           <LegacyCalendar
             ref={ref}
@@ -536,7 +538,12 @@ const LegacyCalendar = forwardRef(function LegacyCalendar(p: LegacyCalendarProps
             </CalendarWeekdays>
             <CalendarWeeks className="sj-legacy-cal__weeks">
               {(cell) => {
-                const day = <CalendarDay value={cell.date} className="sj-legacy-cal__day" aria-label={dayLabel(cell.date)} />;
+                // The number is hidden so VoiceOver reads only the label, once, as with KB.
+                const day = (
+                  <CalendarDay value={cell.date} className="sj-legacy-cal__day" aria-label={dayLabel(cell.date)}>
+                    <span aria-hidden="true">{Number(cell.date.slice(8))}</span>
+                  </CalendarDay>
+                );
                 // MUI renders hidden days too, so the first week has its number even when it starts
                 // on a Sunday. Here the week's first shown day carries it; CSS moves it first in the row.
                 if (!p.hasWeekNumbers || (weekday(cell.date) !== 1 && !cell.date.endsWith("-01"))) return day;
