@@ -1,6 +1,6 @@
 /*
  * Bundle size: each component bundled as an app would (React external), minified, gzipped.
- *   node scripts/bundle-size.mjs
+ *   node size/per-component.mjs   (totals and largest packages: npm run size)
  */
 // Bundles each component the way an app would (react, react-dom external), minified, and reports gzip size.
 import { build } from "esbuild"; import { gzipSync } from "node:zlib"; import path from "node:path";
