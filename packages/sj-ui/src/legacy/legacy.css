@@ -1,0 +1,577 @@
+/* Legacy-only styles: KB looks the new API doesn't have. Delete with the legacy folder. */
+@layer sj-components {
+  /* FlowButton colors that sj-button lacks. */
+  .sj-button[data-legacy-color="orange-primary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-hostlov); --label-color: var(--sjse-color-nonadaptable-light-text); }
+  .sj-button[data-legacy-color="orange-secondary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-sand); }
+  .sj-button[data-legacy-color="black-primary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-svart); --label-color: var(--sjse-color-text-primary-inverted); }
+  .sj-button[data-legacy-color="black-secondary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-sno); }
+  .sj-button[data-legacy-color="white-primary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-nonadaptable-light-text); --label-color: var(--sjse-color-nonadaptable-dark-text); } /* KB: vitNonAdaptable, white in both modes */
+  .sj-button[data-legacy-color="white-secondary"]:not(:disabled, [data-disabled]) {
+    --accent-color: transparent;
+    --label-color: var(--sjse-color-nonadaptable-light-text);
+    outline: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-nonadaptable-light-text);
+  }
+  .sj-button:is([data-legacy-color="frosted-primary"], [data-legacy-color="frosted-secondary"]):not(:disabled, [data-disabled]) {
+    --accent-color: rgb(from var(--sjse-color-background-primary) r g b / 70%);
+    --label-color: var(--sjse-color-text-primary);
+    backdrop-filter: blur(20px);
+    outline: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-border-divider);
+  }
+
+  a.sj-button { text-decoration: none; }
+
+  /* FlowButton: 12 px between symbol and text at every size (4 px above text), symbol at its own size. */
+  .sj-button[data-legacy-flow] .sj-button__label { --sj-button-gap: var(--sjse-spacing-x1_5) !important; --sj-button-symbol-size: auto !important; }
+  /* KB lets a long label wrap, centered, inside the available width. */
+  .sj-button[data-legacy-flow] { max-width: 100%; }
+  .sj-button[data-legacy-flow] :is(.sj-button__label, .sj-button__text) { white-space: normal; text-align: center; }
+  /* KB's height is padding + content, with no minimum. Without the -1px block margins the label gives that. */
+  .sj-button[data-legacy-flow] .sj-button__label { margin-block: 0; }
+  /* KB stacks a top symbol at every size and gives the button its default radius, not a capsule. */
+  .sj-button[data-legacy-flow][data-legacy-top] {
+    border-radius: var(--sjse-border-radius-default);
+    & .sj-button__label { grid-template-columns: auto; grid-template-areas: "symbol" "text"; --sj-button-gap: var(--sjse-spacing-x0_5) !important; }
+  }
+
+  /* isLoading skeletons */
+  .sj-legacy-skeleton {
+    /* MUI's Skeleton: text color at 11 % (13 % in dark), pulse to 40 % over 2 s after 0.5 s. */
+    display: inline-block;
+    width: calc(153rem / 16);
+    height: 3.5rem;
+    border-radius: var(--sjse-border-radius-capsule);
+    background: light-dark(rgb(0 0 0 / 0.11), rgb(255 255 255 / 0.13));
+    animation: sj-legacy-pulse 2s ease-in-out 0.5s infinite;
+    &[data-size="large"] { height: 3rem; }
+    &[data-size="medium"] { height: 2.5rem; }
+    &[data-size="small"] { height: 2rem; }
+    &[data-full-width] { display: block; width: 100%; }
+  }
+  @keyframes sj-legacy-pulse { 50% { opacity: 0.4; } }
+  @media (prefers-reduced-motion: reduce) { .sj-legacy-skeleton { animation: none; } }
+
+  /* FormControlLabel: KB's MUI FormControlLabel. The row takes hover and the focus ring. */
+  .sj-legacy-fcl {
+    --sj-legacy-fcl-neg: calc(-1 * var(--sjse-spacing-x1_5));
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-right: var(--sjse-spacing-x1_5);
+    border-radius: var(--sjse-border-radius-default);
+    cursor: pointer;
+    user-select: text;
+    font: var(--sjse-typography-body);
+    color: var(--sjse-color-text-primary);
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    &[data-placement="start"] { flex-direction: row-reverse; padding-right: 0; padding-left: var(--sjse-spacing-x1_5); }
+    &[data-placement="top"] { flex-direction: column-reverse; }
+    &[data-placement="bottom"] { flex-direction: column; }
+    &[data-space-between] { justify-content: space-between; }
+    &[data-neg-top] { margin-top: var(--sj-legacy-fcl-neg); }
+    &[data-neg-right] { margin-right: var(--sj-legacy-fcl-neg); }
+    &[data-neg-bottom] { margin-bottom: var(--sj-legacy-fcl-neg); }
+    &[data-neg-left] { margin-left: var(--sj-legacy-fcl-neg); }
+    @media (hover: hover) { &:hover:not([data-disabled]) { background-color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered)); } }
+    &:active:not([data-disabled]) { background-color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-pressed)); }
+    &:has(:focus-visible) {
+      outline: var(--sjse-focus-outline-width) solid var(--sjse-color-border-focused);
+      outline-offset: var(--sjse-focus-outline-width);
+      box-shadow: 0 0 0 var(--sjse-focus-outline-extent) var(--sjse-color-background-primary);
+      /* KB tries to reset the control's own ring here, but its global ring sits in an earlier
+         cascade layer and wins, so KB shows both rings. Same here. */
+    }
+    &[data-inset-focus]:has(:focus-visible) {
+      outline-offset: calc(var(--sjse-focus-outline-width) * -2);
+      box-shadow: inset 0 0 0 var(--sjse-focus-outline-extent) var(--sjse-color-background-primary);
+    }
+    &[data-disabled] { cursor: default; color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-disabled)); }
+  }
+
+  /*
+   * KB's switch is a native checkbox input with role="switch": the thumb is ::after and the state
+   * comes from :checked and :disabled. It shares the track, symbols and variables with .sj-switch.
+   * KB keeps the 12 px margin of the old MUI switch.
+   */
+  input.sj-switch[data-sj-legacy] {
+    appearance: none;
+    flex: 0 1 auto; /* KB's input shrinks in a narrow row */
+    margin: var(--sjse-spacing-x1_5);
+    &[data-list-offset] { margin-right: calc(-1 * var(--sjse-spacing-x1_5)); }
+    &::after {
+      content: "";
+      position: absolute;
+      inset-block: var(--sj-switch-minor-inset);
+      inset-inline: var(--sj-switch-minor-inset) var(--sj-switch-inset);
+      border-radius: var(--sjse-border-radius-capsule);
+      background-color: var(--sjse-color-nonadaptable-light-text);
+      outline: var(--sjse-spacing-x1) solid var(--hover-color);
+      transition: inset 0.25s linear(0, 0.03 1.1%, 0.125 2.4%, 0.906 9.8%, 1.046 12.3%, 1.11 15%, 1.116 16.3%, 1.11 17.8%, 1.014 25.8%, 0.987 31.2%, 1.001 47.2%, 1);
+    }
+    &:checked:not(:disabled) { --accent-color: var(--sjse-color-fill-lov-1); }
+    &:checked::after { inset-inline: var(--sj-switch-inset) var(--sj-switch-minor-inset); }
+    &:disabled { opacity: var(--sjse-opacity-disabled); cursor: not-allowed; }
+    @media (hover: hover) and (pointer: fine) {
+      &:hover:not(:disabled, :focus-visible) { --hover-color: rgb(from var(--hover-base-color) r g b / var(--sjse-opacity-hovered)); }
+      &:active:not(:disabled, :focus-visible) { --hover-color: rgb(from var(--hover-base-color) r g b / var(--sjse-opacity-pressed)); }
+    }
+    @media (prefers-reduced-motion: reduce) { &::after { transition: none; } }
+  }
+}
+
+@layer sj-components {
+  .sj-legacy-badge {
+    display: inline-block;
+    padding: 0 var(--sjse-spacing-x1);
+    border-radius: var(--sjse-border-radius-capsule);
+    background: var(--sjse-color-fill-ang);
+    font: var(--sjse-typography-footnote-emphasized);
+    justify-self: start;
+  }
+}
+
+/*
+ * Select and MenuItem: KB's MUI Select, its menu (ui.menu-item, Select's MenuProps) and the
+ * bottom sheet KB opens below 600 px (ui.menu, variant bottomsheet).
+ */
+@layer sj-components {
+  .sj-legacy-select { display: inline-flex; flex-direction: column; min-width: 0; vertical-align: top; }
+  .sj-legacy-select[data-full-width] { display: flex; width: 100%; }
+
+  .sj-field[data-legacy-select] {
+    & .sj-field__box { min-height: calc(2 * var(--sj-legacy-pad) + 1.5rem); }
+    & .sj-select__trigger { min-height: calc(2 * var(--sj-legacy-pad) + 1.5rem); }
+    &[data-has-start] .sj-select__trigger { padding-left: 0; }
+    /* KB's focus ring sits on MUI's select display: the box minus its 16 px side padding (none on
+       the start side after an icon). The field also turns focus-blue, even with an error. */
+    & .sj-select__trigger { position: relative; }
+    & .sj-select__trigger:focus-visible { outline: none !important; box-shadow: none !important; }
+    & .sj-select__trigger:focus-visible::after {
+      content: "";
+      position: absolute;
+      inset: 0 var(--sjse-spacing-default) 0 var(--sjse-spacing-default);
+      outline: var(--sjse-focus-outline-width) solid var(--sjse-color-border-focused);
+      outline-offset: var(--sjse-focus-outline-offset);
+      box-shadow: 0 0 0 calc(var(--sjse-focus-outline-width) * 3) var(--sjse-color-background-primary);
+      border-radius: var(--sjse-border-radius-sm);
+      pointer-events: none;
+    }
+    &[data-has-start] .sj-select__trigger:focus-visible::after { inset-inline-start: 0; }
+    &[data-rounded] .sj-select__trigger:focus-visible::after { inset-inline: var(--sjse-spacing-x3); }
+    &[data-invalid]:is(:focus-within, :has([data-open])) .sj-field__outline { border-color: var(--sjse-color-border-focused) !important; }
+    &[data-invalid]:is(:focus-within, :has([data-open])) .sj-field__label { color: var(--sjse-color-border-focused); }
+    &:not([data-filled], :focus-within, :has([data-open])) .sj-field__label { transform: translate(0.875rem, var(--sj-legacy-pad)) scale(1); }
+    /* Rounded: a capsule with the label hidden and more room on the sides. */
+    &[data-rounded] {
+      & .sj-field__box { border-radius: var(--sjse-border-radius-capsule); }
+      & .sj-field__label { visibility: hidden; }
+      & .sj-field__outline { top: 0; }
+      & .sj-field__outline legend { display: none; }
+      & .sj-select__trigger { padding-inline: var(--sjse-spacing-x3); }
+    }
+  }
+  .sj-legacy-native-select { appearance: none; background: none; border: 0; }
+
+  /* The menu under the field. */
+  .sj-legacy-menu {
+    box-sizing: border-box;
+    min-width: var(--anchor-width, 12rem);
+    max-height: min(calc(100dvh - 2rem), var(--available-height, 100dvh));
+    overflow: auto;
+    margin: 0;
+    padding: 0;
+    border: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-border-border);
+    border-radius: var(--sjse-border-radius-xl);
+    background: var(--sjse-color-background-primary-level-1);
+    color: var(--sjse-color-text-primary);
+    box-shadow: var(--sjse-shadow-default);
+    outline: none;
+    &[data-auto-width] { min-width: 0; }
+    &[data-presentation="popover"] .sj-legacy-menu__header { display: none; }
+  }
+  .sj-legacy-menu__list { margin: 0; padding: 0; outline: none; }
+
+  /* A row, in a menu or on its own. */
+  .sj-legacy-menu-item {
+    --sj-legacy-menu-pad: var(--sjse-spacing-default);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    margin: 0;
+    padding: var(--sj-legacy-menu-pad) var(--sjse-spacing-default);
+    list-style: none;
+    cursor: pointer;
+    font: var(--sjse-typography-body);
+    color: var(--sjse-color-text-primary);
+    text-decoration: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    :is(.sj-legacy-menu[data-density="compact"]) & { --sj-legacy-menu-pad: var(--sjse-spacing-x1_5); }
+    :is(.sj-legacy-menu[data-density="dense"]) & { --sj-legacy-menu-pad: var(--sjse-spacing-x1); }
+    :is(.sj-legacy-menu[data-density="tight"]) & { --sj-legacy-menu-pad: var(--sjse-spacing-x0_5); }
+    @media (hover: hover) { &:hover:not([data-disabled]) { background-color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered)); } }
+    &:active:not([data-disabled]) { background-color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-pressed)); }
+    &:focus-visible, .sj-legacy-menu[data-modality="keyboard"] &[data-highlighted] {
+      outline: var(--sjse-focus-outline-width) solid var(--sjse-color-border-focused) !important;
+      outline-offset: calc(var(--sjse-focus-outline-width) * -2) !important;
+      box-shadow: 0 0 0 calc(var(--sjse-focus-outline-width) * 3) var(--sjse-color-background-primary) !important;
+      z-index: 1;
+    }
+    .sj-legacy-menu[data-presentation="popover"] &:first-child:is(:focus-visible, [data-highlighted]) { border-start-start-radius: var(--sjse-border-radius-xl); border-start-end-radius: var(--sjse-border-radius-xl); }
+    .sj-legacy-menu[data-presentation="popover"] &:last-child:is(:focus-visible, [data-highlighted]) { border-end-start-radius: var(--sjse-border-radius-xl); border-end-end-radius: var(--sjse-border-radius-xl); }
+    &[data-disabled] { opacity: var(--sjse-opacity-disabled); cursor: default; pointer-events: none; }
+    &[data-variant="separator"] { cursor: default; padding: var(--sjse-spacing-x3) var(--sjse-spacing-default) var(--sjse-spacing-x1); }
+  }
+  .sj-legacy-menu-item__text { flex: 1 1 auto; min-width: 0; }
+  .sj-legacy-menu-item__check { display: flex; flex: none; margin-left: 0.28125rem; margin-right: calc(-1 * var(--sjse-spacing-x1_5)); width: 2.25rem; }
+  .sj-legacy-menu-item__check svg { width: 1.5rem; height: 1.5rem; }
+  .sj-legacy-menu-item__state { display: flex; flex: none; padding-right: var(--sjse-spacing-x1_5); color: var(--sjse-color-fill-granit); }
+  .sj-legacy-menu-item__state[data-selected] { color: var(--sjse-color-fill-lov-1); }
+  .sj-legacy-menu-item input.sj-switch[data-in-menu] { margin: 0; pointer-events: none; }
+  .sj-legacy-menu-divider {
+    display: block;
+    height: 0;
+    margin: 0 0 0 var(--sjse-spacing-default);
+    width: calc(100% - 2 * var(--sjse-spacing-default));
+    border: 0;
+    border-bottom: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-border-divider);
+    list-style: none;
+  }
+
+  /* The bottom sheet below 600 px: title and close button, then the rows. */
+  .sj-legacy-menu[data-presentation="sheet"] {
+    width: 100%;
+    max-height: 80dvh;
+    border: 0;
+    border-radius: var(--sjse-border-radius-xl) var(--sjse-border-radius-xl) 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  /* KB's sheet: a 56 px app bar holds only the close button, and the title (an h1, title 1) sits
+     20 px from the top, over an inset divider. */
+  .sj-legacy-menu__header {
+    position: relative;
+    padding: 1.25rem var(--sjse-spacing-default) var(--sjse-spacing-default);
+  }
+  .sj-legacy-menu__header::after {
+    content: "";
+    position: absolute;
+    inset: auto var(--sjse-spacing-default) 0;
+    border-bottom: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-border-divider);
+  }
+  .sj-legacy-menu__title { margin: 0; padding-right: 3rem; font: var(--sjse-typography-title-1-emphasized); }
+  .sj-legacy-menu__nav { display: contents; }
+  .sj-legacy-menu__close {
+    all: unset;
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: rgb(from var(--sjse-color-text-primary) r g b / 0.04);
+    cursor: pointer;
+    svg { width: 1.5rem; height: 1.5rem; }
+  }
+  /* MUI's backdrop behind the sheet. */
+  [data-slot="select-viewport"]:has(> .sj-legacy-menu[data-presentation="sheet"]) {
+    transition: background-color 225ms cubic-bezier(0.4, 0, 0.2, 1);
+    &:has(> [data-open]:not([data-ending-style])) { background-color: rgb(0 0 0 / 0.5); }
+  }
+
+  /* isLoading: KB's SelectSkeleton. */
+  .sj-legacy-select-skeleton {
+    display: inline-flex; flex-direction: column; gap: var(--sjse-spacing-default);
+    &[data-full-width] { display: flex; width: 100%; }
+  }
+  .sj-legacy-select-skeleton__label { display: block; width: 80px; height: 14px; margin-block: 6px 4px; border-radius: var(--sjse-border-radius-sm); background: light-dark(rgb(0 0 0 / 0.11), rgb(255 255 255 / 0.13)); animation: sj-legacy-pulse 2s ease-in-out 0.5s infinite; }
+  .sj-legacy-select-skeleton__box {
+    --sj-legacy-pad: var(--sjse-spacing-default);
+    box-sizing: border-box;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--sjse-spacing-default);
+    inline-size: 100%; max-inline-size: 343px; min-inline-size: min-content;
+    block-size: calc(2 * var(--sj-legacy-pad) + 1.5rem);
+    padding-inline: var(--sjse-spacing-default);
+    border: var(--sjse-border-width-sm, 1px) solid color-mix(in srgb, var(--sjse-color-border-input), transparent 42%);
+    border-radius: var(--sjse-border-radius-xl);
+    font: var(--sjse-typography-body);
+    &[data-density="compact"] { --sj-legacy-pad: var(--sjse-spacing-x1_5); }
+    &[data-density="dense"] { --sj-legacy-pad: var(--sjse-spacing-x1); }
+    &[data-density="tight"] { --sj-legacy-pad: var(--sjse-spacing-x0_5); }
+    &[data-radius="lg"] { border-radius: var(--sjse-border-radius-lg); }
+    &[data-radius="md"] { border-radius: var(--sjse-border-radius-md); }
+    &[data-radius="sm"] { border-radius: var(--sjse-border-radius-sm); }
+    &[data-rounded], &[data-radius="capsule"] { border-radius: var(--sjse-border-radius-capsule); }
+    &[data-rounded] { padding-inline: var(--sjse-spacing-x3); }
+    [data-full-width] > & { max-inline-size: 100%; }
+    & svg { min-inline-size: 1.5rem; color: var(--sjse-color-icon-secondary); opacity: var(--sjse-opacity-disabled); }
+  }
+  .sj-legacy-select-skeleton__bar { display: block; block-size: 12px; inline-size: 40%; min-inline-size: 16px; border-radius: var(--sjse-border-radius-sm); background: light-dark(rgb(0 0 0 / 0.11), rgb(255 255 255 / 0.13)); animation: sj-legacy-pulse 2s ease-in-out 0.5s infinite; }
+}
+
+/*
+ * DatePicker: KB's DateField (MUI TextField with a calendar IconButton) and DateCalendar (MUI X
+ * DateCalendar with KB's PickersDay), measured against KB in light and dark, desktop and sheet.
+ */
+@layer sj-components {
+  .sj-legacy-date {
+    display: inline-flex;
+    width: fit-content;
+    min-width: 0;
+    &[data-full-width] { display: flex; width: auto; }
+    & > .sj-field { flex: 1; min-width: 0; }
+  }
+
+  /* KB's TextField densities and corner radii, shared by Select and DatePicker. */
+  .sj-field:is([data-legacy-select], [data-legacy-date]) {
+    --sj-legacy-pad: var(--sjse-spacing-default);
+    &[data-density="compact"] { --sj-legacy-pad: var(--sjse-spacing-x1_5); }
+    &[data-density="dense"] { --sj-legacy-pad: var(--sjse-spacing-x1); }
+    &[data-density="tight"] { --sj-legacy-pad: var(--sjse-spacing-x0_5); }
+    &[data-radius="lg"] .sj-field__box { border-radius: var(--sjse-border-radius-lg); }
+    &[data-radius="md"] .sj-field__box { border-radius: var(--sjse-border-radius-md); }
+    &[data-radius="sm"] .sj-field__box { border-radius: var(--sjse-border-radius-sm); }
+    &[data-radius="capsule"] .sj-field__box { border-radius: var(--sjse-border-radius-capsule); }
+  }
+
+  .sj-field[data-legacy-date] {
+    min-width: 0;
+
+    &:not([data-external-label]) .sj-field__label { line-height: 1.4375em; }
+    &[data-disabled] .sj-field__label { color: var(--sjse-color-text-secondary); }
+    &:not([data-filled], :focus-within) .sj-field__label { transform: translate(0.875rem, var(--sj-legacy-pad)) scale(1); }
+    & .sj-field__box { min-height: 0; height: calc(2 * var(--sj-legacy-pad) + 1.5rem); padding-right: var(--sjse-spacing-x1); }
+    & .sj-field__end { padding: 0 0 0 var(--sjse-spacing-x0_5); }
+    &[data-disabled] .sj-legacy-date__input { -webkit-text-fill-color: currentColor; }
+    /* KB's open calendar takes focus and lays an invisible backdrop over the page: the field
+       keeps its resting look and nothing under the pointer shows hover. */
+    &:has([data-open]):not(:focus-within) {
+      & .sj-field__outline { border-width: 1px; }
+      &:not([data-invalid]) .sj-field__outline { border-color: var(--sjse-color-border-input) !important; }
+      &:not([data-filled]) .sj-field__outline legend { max-width: 0.01px; }
+      &:not([data-invalid]) .sj-field__label { color: var(--sjse-color-text-secondary); }
+      & .sj-field__box, & .sj-legacy-date__button { background: none !important; }
+    }
+  }
+
+  /* The popover's anchor: the whole box, as KB anchors on the outline. */
+  .sj-legacy-date__anchor { position: absolute; inset: 0; pointer-events: none; }
+
+  .sj-legacy-date__input {
+    all: unset;
+    box-sizing: border-box;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    padding: var(--sj-legacy-pad) 0 var(--sj-legacy-pad) var(--sjse-spacing-default);
+    font: var(--sjse-typography-body);
+    color: var(--sjse-color-text-primary);
+    cursor: inherit;
+    /* MUI hides the placeholder while the label sits in the box. */
+    &::placeholder { color: currentColor; opacity: 0; }
+    .sj-field:is(:focus-within, [data-external-label]) &::placeholder { opacity: 0.42; }
+  }
+  /* Below 600 px: a read-only textarea that opens the calendar, MUI's multiline padding. */
+  textarea.sj-legacy-date__input {
+    display: block;
+    height: 1.5rem;
+    padding: 0;
+    margin: var(--sj-legacy-pad) 0 var(--sj-legacy-pad) 0.875rem;
+    resize: none;
+    overflow: hidden;
+    white-space: pre-wrap;
+    cursor: pointer;
+  }
+
+  /* MUI IconButton: 40 px, 8 px padding, hover fill. Small (dense and tight) is 34 px with 5 px. */
+  .sj-legacy-date__button {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: var(--sjse-spacing-x1);
+    border-radius: 50%;
+    color: var(--sjse-color-text-primary);
+    cursor: pointer;
+    &:is([data-density="dense"], [data-density="tight"]) { width: 2.125rem; height: 2.125rem; padding: 0.3125rem; }
+    & svg { width: 1.5rem; height: 1.5rem; }
+    &:hover:not(:disabled) { background: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered)); }
+    &:disabled { cursor: default; color: rgb(from var(--sjse-color-text-primary) r g b / 0.26); }
+  }
+
+  /* The calendar's paper: MUI Popover, 343 px (375 with week numbers), radius 16, 16 padding. */
+  .sj-legacy-cal-popup {
+    box-sizing: border-box;
+    width: 21.4375rem;
+    max-width: calc(100vw - 2rem);
+    margin: 0;
+    padding: var(--sjse-spacing-default);
+    border: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-border-border);
+    border-radius: var(--sjse-border-radius-xl);
+    background: var(--sjse-color-background-primary-level-1);
+    color: var(--sjse-color-text-primary);
+    box-shadow: var(--sjse-shadow-default);
+    outline: none;
+    &[data-weeks] { width: 23.4375rem; }
+    transition: opacity 225ms cubic-bezier(0.4, 0, 0.2, 1);
+    &[data-starting-style], &[data-ending-style] { opacity: 0; }
+
+    /* KB's BottomSheet below 600 px. */
+    &[data-presentation="sheet"] {
+      width: 100%;
+      max-width: none;
+      padding: var(--sjse-spacing-x3) var(--sjse-spacing-default) calc(var(--sjse-spacing-default) + env(safe-area-inset-bottom, 0px));
+      border: 0;
+      border-radius: var(--sjse-border-radius-xl) var(--sjse-border-radius-xl) 0 0;
+      box-shadow: 0 0 6px rgb(0 0 0 / 0.12);
+      transition: translate 225ms cubic-bezier(0, 0, 0.2, 1);
+      &[data-starting-style], &[data-ending-style] { opacity: 1; translate: 0 100%; }
+    }
+  }
+  /* MUI's backdrop behind KB's sheet: black at 50 %. */
+  [data-slot="popover-viewport"]:has(> .sj-legacy-cal-popup[data-presentation="sheet"])::backdrop {
+    background: rgb(0 0 0 / 0.5);
+    transition: opacity 225ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  [data-slot="popover-viewport"]:has(> .sj-legacy-cal-popup[data-presentation="sheet"][data-ending-style])::backdrop { opacity: 0; }
+  .sj-legacy-cal {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--sjse-spacing-x1);
+    width: 21.4375rem;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .sj-legacy-cal__header {
+    display: grid;
+    grid-template-columns: 1fr var(--sjse-spacing-x1) 0.3fr var(--sjse-spacing-x1);
+    align-items: center;
+    min-height: 2rem;
+    [data-weeks] > & { grid-template-columns: 1fr var(--sjse-spacing-x1) 0.26fr var(--sjse-spacing-x1); }
+  }
+  .sj-legacy-cal__label-wrap { grid-column: 1; display: flex; align-items: center; gap: var(--sjse-spacing-x1); min-width: 0; }
+  .sj-legacy-cal__label { font: 500 1.5rem/2rem var(--sjse-font-family); text-transform: capitalize; white-space: nowrap; }
+  .sj-legacy-cal__arrows { grid-column: 3; display: flex; justify-content: space-between; align-items: center; }
+
+  .sj-legacy-cal__switch,
+  .sj-legacy-cal__arrow {
+    all: unset;
+    position: relative;
+    box-sizing: border-box;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    color: rgb(from var(--sjse-color-text-primary) r g b / 0.54);
+    cursor: pointer;
+    & svg { width: 100%; height: 100%; }
+    /* 48 px touch target, as KB. */
+    &::before { content: ""; position: absolute; min-width: 3rem; min-height: 3rem; }
+    &:hover:not([data-disabled]) { background: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered)); }
+    &[data-disabled] { color: rgb(from var(--sjse-color-text-primary) r g b / 0.26); cursor: default; }
+  }
+  .sj-legacy-cal__switch { transition: transform 0.2s; }
+  .sj-legacy-cal:not([data-view="day"]) .sj-legacy-cal__switch { transform: rotate(180deg); }
+
+  .sj-legacy-cal__view { height: 20.5rem; }
+
+  /* The grid: a table laid out as MUI's flex rows, 40 px days spread over the width. */
+  .sj-legacy-cal__grid { display: flex; flex-direction: column; width: 100%; border-spacing: 0; }
+  .sj-legacy-cal__weekdays, .sj-legacy-cal__weeks { display: flex; flex-direction: column; }
+  .sj-legacy-cal__weeks { row-gap: var(--sjse-spacing-x1); }
+  .sj-legacy-cal__grid tr { display: flex; justify-content: space-between; }
+  .sj-legacy-cal__grid td, .sj-legacy-cal__grid th { box-sizing: border-box; flex: none; width: 2.5rem; height: 2.5rem; padding: 0; }
+  .sj-legacy-cal__weekday {
+    display: flex; align-items: center; justify-content: center;
+    font: var(--sjse-typography-subheadline);
+    color: var(--sjse-color-text-secondary);
+  }
+  .sj-legacy-cal__week { order: -1; display: flex; align-items: center; justify-content: center; font: var(--sjse-typography-subheadline); }
+
+  .sj-legacy-cal__day {
+    position: relative;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font: var(--sjse-typography-body);
+    color: var(--sjse-color-text-primary);
+    cursor: pointer;
+    user-select: none;
+    &:hover:not([data-disabled], [data-selected]) { background: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered)); }
+    &[data-today] { border: 1px solid var(--sjse-color-text-secondary); }
+    &[data-selected] {
+      background: var(--sjse-color-fill-lov-1);
+      color: var(--sjse-color-nonadaptable-light-text);
+      font-size: 1.1875rem;
+      border: 0;
+    }
+    /* KB strikes unavailable days through with a grey line. */
+    &[data-disabled]:not([data-selected]) {
+      color: rgb(from var(--sjse-color-text-primary) r g b / 0.42);
+      cursor: default;
+      &::after { content: ""; position: absolute; width: 1.25px; height: 1.5rem; background: rgb(148 148 148); rotate: 45deg; }
+    }
+  }
+
+  /* Month and year views: MUI's MonthCalendar and YearCalendar, four a row. */
+  .sj-legacy-cal__picks {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 4.4375rem);
+    justify-content: space-between;
+    align-content: start;
+    row-gap: var(--sjse-spacing-default);
+    padding-top: var(--sjse-spacing-default);
+    /* Years: 72 x 36, 18 px text, in a 312 px scroller 12 px down, as MUI's YearCalendar. */
+    &[data-kind="year"] {
+      box-sizing: border-box;
+      grid-template-columns: repeat(4, 4.5rem);
+      justify-content: start;
+      column-gap: calc(16rem / 3 / 16);
+      height: 19.5rem;
+      margin: 0.75rem -0.25rem 0;
+      padding: 0.25rem;
+      overflow-y: auto;
+      scrollbar-width: none;
+      & .sj-legacy-cal__pick { width: 4.5rem; height: 2.25rem; font-size: 1.125rem; line-height: 1.75rem; }
+    }
+  }
+  .sj-legacy-cal__pick {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 4.4375rem;
+    height: 2rem;
+    padding: 1px 6px;
+    border-radius: 1.125rem;
+    font: var(--sjse-typography-body);
+    text-transform: capitalize;
+    color: var(--sjse-color-text-primary);
+    cursor: pointer;
+    &:hover:not(:disabled, [data-selected]) { background: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered)); }
+    &[data-selected] { background: var(--sjse-color-fill-lov-1); color: var(--sjse-color-nonadaptable-light-text); }
+    .sj-legacy-cal__picks[data-kind="month"] > &[data-selected] { font-weight: 700; font-size: 1.1875rem; }
+    &:disabled { color: rgb(from var(--sjse-color-text-primary) r g b / 0.42); text-decoration: line-through; cursor: default; }
+  }
+  /* MUI darkens the selected year by 30 % on hover and focus. KB's months and days keep their green. */
+  .sj-legacy-cal__picks[data-kind="year"] > .sj-legacy-cal__pick[data-selected]:is(:hover, :focus) { background: color-mix(in srgb, var(--sjse-color-fill-lov-1) 70%, black); }
+
+  .sj-legacy-cal__actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--sjse-spacing-default);
+    & > * { width: calc(50% - var(--sjse-spacing-x1)); }
+  }
+
+  .sj-legacy-select-skeleton__box[data-legacy-date-skeleton] { max-inline-size: none; inline-size: 198px; [data-full-width] > & { inline-size: 100%; } }
+  .sj-legacy-select-skeleton__box[data-legacy-date-skeleton] .sj-legacy-select-skeleton__bar { inline-size: 47%; }
+}

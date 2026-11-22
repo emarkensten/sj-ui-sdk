@@ -1,0 +1,24 @@
+/*
+ * sj-ui styles. Import once: `import "@sj-ui-sdk/sj-ui/styles.css"`.
+ *
+ * Layer order, lowest first. Unlayered CSS (yours) beats all of them.
+ *   sj-tokens      SJ's global styles: --sjse-* tokens, reset, fonts (vendored, see vendor/VERSION.json)
+ *   sj-base        what the tokens need but don't define, plus helpers
+ *   ui-sdk         ui-sdk's behaviour CSS
+ *   sj-components  one file per component
+ *
+ * sj-global-styles wraps itself in `@layer theme`. Importing it into `sj-tokens` nests that as
+ * `sj-tokens.theme`, so it no longer collides with Tailwind v4's own `theme` layer (Lovable).
+ */
+@layer sj-tokens, sj-base, ui-sdk, sj-components;
+
+@import "./vendor/sj-global-styles.css" layer(sj-tokens);
+@import "./base.css";
+@import "./components/spinner/spinner.css";
+@import "./components/typography/typography.css";
+@import "./components/button/button.css";
+@import "./components/switch/switch.css";
+@import "./components/field/field.css";
+@import "./components/select/select.css";
+@import "./components/date-picker/date-picker.css";
+@import "./components/departure-card/departure-card.css";

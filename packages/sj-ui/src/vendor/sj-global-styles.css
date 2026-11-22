@@ -1,0 +1,487 @@
+/* Vendored from @sj-ab/component-library.styles.sj-global-styles@3.1.0. Do not edit: run `npm run sync`. */
+/* region : Fonts */
+@font-face {
+	font-family: "sj_sans";
+	font-display: swap;
+	src: local('sj_sans'),
+	local('sj_sans_regular'),
+	url("https://www.sj.se/fonts/sj-sans-regular.woff2") format('woff2'),
+	url("https://www.sj.se/fonts/sj-sans-regular.woff") format('woff');
+}
+
+@font-face {
+	font-family: "sj_sans";
+	font-style: italic;
+	font-display: swap;
+	src: local('sj_sans_regular_italic'),
+	url("https://www.sj.se/fonts/sj-sans-regular-italic.woff2") format('woff2'),
+	url("https://www.sj.se/fonts/sj-sans-regular-italic.woff") format('woff');
+}
+
+@font-face {
+	font-family: "sj_sans";
+	font-weight: 500;
+	font-display: swap;
+	src: local('sj_sans_medium'),
+	url("https://www.sj.se/fonts/sj-sans-medium.woff2") format('woff2'),
+	url("https://www.sj.se/fonts/sj-sans-medium.woff") format('woff');
+}
+
+@font-face {
+	font-family: "sj_sans";
+	font-weight: bold;
+	font-display: swap;
+	src: local('sj_sans_bold'),
+	url("https://www.sj.se/fonts/sj-sans-bold.woff2") format('woff2'),
+	url("https://www.sj.se/fonts/sj-sans-bold.woff") format('woff');
+}
+
+/* endregion : Fonts */
+
+@property --sjse-base-value {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 16;
+}
+
+@property --sjse-font-family {
+	syntax: "*";
+	inherits: false;
+	initial-value: "sj_sans", sans-serif;
+}
+
+/*
+TODO: This has to be defined "globally" for the hover effects to work inside shadow DOM.
+	(Unsure if this is specifically a shadow DOM thing or how CSS handles custom properties in transitions)
+	@see sj-button.css for usage example.
+*/
+@property --sjse-hover-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: transparent;
+}
+
+/* TODO (2026-11-11): We set the following two properties to `!important` since the
+    `font:` shorthand resets the font-variant-* and font-feature-settings to `normal`.
+    It also sits outside of the @layer theme, so that it overrides any props set in layers.
+    It would be nice to find another solution for this. Perhaps using @layer ordering. */
+* {
+	font-feature-settings: "tnum" off !important;
+	font-variant-ligatures: common-ligatures discretionary-ligatures !important;
+}
+
+@layer theme {
+	/* Initial values can not be set to other CSS vars. Explicit values are set to CSS vars further down. */
+	@property --sjse-max-inline-size {
+		syntax: "<length-percentage>";
+		inherits: true;
+		initial-value: 1200px;
+	}
+
+	@property --sjse-margin-size {
+		syntax: "<length-percentage>";
+		inherits: true;
+		initial-value: 16px;
+	}
+
+	@property --sjse-padding-size {
+		syntax: "<length-percentage>";
+		inherits: true;
+		initial-value: 16px;
+	}
+
+	@property --sjse-actual-margin-size {
+		syntax: "<length-percentage>";
+		inherits: true;
+		initial-value: 16px;
+	}
+
+	@property --sjse-gutter-size {
+		syntax: "<length-percentage>";
+		inherits: true;
+		initial-value: 16px;
+	}
+
+	/* TODO (2026-08-26): We can use this when @function and `if` become widely available */
+	/*@function --light-dark(--l, --d) {*/
+	/*	result: if(color-scheme(dark): var(--d); else: var(--l));*/
+	/*}*/
+	:root {
+		color-scheme: light dark;
+
+		/* Font base settings */
+		font-family: var(--sjse-font-family);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		font-synthesis: none;
+		hyphens: auto;
+	}
+
+
+	/* TODO (2026-10-28): Are there any more resets we need? */
+	@layer reset {
+		/* TODO: Should we really default to border-box? */
+		*, *::before, *::after {
+			box-sizing: border-box;
+		}
+
+		[popover] {
+			inset: auto;
+		}
+	}
+
+	@layer design-tokens {
+		:root {
+			--sjse-spacing-base: calc(8rem / var(--sjse-base-value));
+
+			@layer aspect-ratio {
+				/* region Aspect Ratio */
+
+				--sjse-aspect-ratio-landscape: 3 / 2;
+				--sjse-aspect-ratio-portrait: 2 / 3;
+				--sjse-aspect-ratio-square: 1 / 1;
+				--sjse-aspect-ratio-ultrawide: 21 / 9;
+				--sjse-aspect-ratio-vertical: 9 / 16;
+				--sjse-aspect-ratio-widescreen: 16 / 9;
+				--sjse-aspect-ratio-default: var(--sjse-aspect-ratio-landscape);
+
+				/* endregion Aspect Ratio */
+
+				--sjse-aspect-ratio: var(--sjse-aspect-ratio-landscape);
+			}
+
+			@layer dimension {
+				/* region Dimension */
+
+				/* Spacing */
+				--sjse-spacing-x0_5: calc(var(--sjse-spacing-base) * 0.5);
+				--sjse-spacing-x1: var(--sjse-spacing-base);
+				--sjse-spacing-x1_5: calc(var(--sjse-spacing-base) * 1.5);
+				--sjse-spacing-x2: calc(var(--sjse-spacing-base) * 2);
+				--sjse-spacing-x2_5: calc(var(--sjse-spacing-base) * 2.5);
+				--sjse-spacing-x3: calc(var(--sjse-spacing-base) * 3);
+				--sjse-spacing-x4: calc(var(--sjse-spacing-base) * 4);
+				--sjse-spacing-x5: calc(var(--sjse-spacing-base) * 5);
+				--sjse-spacing-x6: calc(var(--sjse-spacing-base) * 6);
+				--sjse-spacing-x7: calc(var(--sjse-spacing-base) * 7);
+				--sjse-spacing-x8: calc(var(--sjse-spacing-base) * 8);
+				--sjse-spacing-x9: calc(var(--sjse-spacing-base) * 9);
+				--sjse-spacing-x10: calc(var(--sjse-spacing-base) * 10);
+
+				/* Width */
+				--sjse-width-xs: calc(400rem / var(--sjse-base-value));
+				--sjse-width-sm: calc(600rem / var(--sjse-base-value));
+				--sjse-width-md: calc(800rem / var(--sjse-base-value));
+				--sjse-width-lg: calc(1000rem / var(--sjse-base-value));
+				--sjse-width-xl: calc(1200rem / var(--sjse-base-value));
+				--sjse-width-xxl: calc(1400rem / var(--sjse-base-value));
+				--sjse-width-xxxl: calc(1600rem / var(--sjse-base-value));
+				--sjse-width-default: var(--sjse-width-xl);
+
+				/* Border width */
+				--sjse-border-width-sm: calc(1rem / var(--sjse-base-value));
+				--sjse-border-width-md: calc(2rem / var(--sjse-base-value));
+				--sjse-border-width-lg: calc(3rem / var(--sjse-base-value));
+				--sjse-border-width-default: var(--sjse-border-width-sm);
+
+				/* Border radius */
+				--sjse-border-radius-sm: calc(4rem / var(--sjse-base-value));
+				--sjse-border-radius-md: calc(8rem / var(--sjse-base-value));
+				--sjse-border-radius-lg: calc(12rem / var(--sjse-base-value));
+				--sjse-border-radius-xl: calc(16rem / var(--sjse-base-value));
+				--sjse-border-radius-capsule: calc(infinity * 1px);
+				--sjse-border-radius-default: var(--sjse-border-radius-xl);
+
+				/* Backdrop blur */
+				--sjse-backdrop-blur-chrome: 25px;
+				--sjse-backdrop-blur-frosted: 25px;
+
+				/* endregion Dimension */
+
+				/* Spacing */
+				--sjse-spacing-x0_75: calc(var(--sjse-spacing-base) * 0.75);
+				--sjse-spacing-x1_25: calc(var(--sjse-spacing-base) * 1.25);
+				--sjse-spacing-x1_75: calc(var(--sjse-spacing-base) * 1.75);
+				--sjse-spacing-default: var(--sjse-spacing-x2);
+				--sjse-spacing-extra: var(--sjse-spacing-x3);
+
+				/* Border radius */
+				--sjse-border-radius-xxl: var(--sjse-spacing-x2_5);
+				--sjse-border-radius-xxxl: var(--sjse-spacing-x3);
+				--sjse-border-radius-xxxxl: var(--sjse-spacing-x4);
+				--sjse-border-radius-xxxxxl: calc(38rem / var(--sjse-base-value));
+			}
+
+			@layer opacity {
+				/* region Opacity */
+
+				--sjse-opacity-disabled: 42%;
+				--sjse-opacity-hovered: 8%;
+				--sjse-opacity-loading: 42%;
+				--sjse-opacity-pressed: 12%;
+				--sjse-opacity-selected: 4%;
+				--sjse-opacity-striped: 4%;
+
+				/* endregion Opacity */
+
+				/* TODO (2026-09-14): Use the --light-dark function when it becomes available */
+				@media (prefers-color-scheme: dark) {
+					--sjse-opacity-selected: 8%;
+					--sjse-opacity-striped: 8%;
+					--sjse-opacity-hovered: 12%;
+					--sjse-opacity-pressed: 20%;
+				}
+			}
+
+			@layer color {
+				/* region Color */
+
+				/*  ⌙ Background */
+				--sjse-color-background-primary: light-dark(rgb(255 255 255), rgb(18 18 18));
+				--sjse-color-background-primary-level-1: light-dark(rgb(255 255 255), rgb(30 30 30));
+				--sjse-color-background-primary-level-2: light-dark(rgb(255 255 255), rgb(42 42 42));
+				--sjse-color-background-secondary: light-dark(rgb(255 255 255), rgb(30 30 30));
+				--sjse-color-background-secondary-level-1: light-dark(rgb(255 255 255), rgb(42 42 42));
+				--sjse-color-background-secondary-level-2: light-dark(rgb(255 255 255), rgb(54 54 54));
+				--sjse-color-background-tertiary: light-dark(rgb(255 255 255), rgb(42 42 42));
+				--sjse-color-background-tertiary-level-1: light-dark(rgb(255 255 255), rgb(54 54 54));
+				--sjse-color-background-tertiary-level-2: light-dark(rgb(255 255 255), rgb(65 65 65));
+
+				/*  ⌙ Background grouped */
+				--sjse-color-background-grouped-primary: light-dark(rgb(245 245 245), rgb(18 18 18));
+				--sjse-color-background-grouped-primary-level-1: light-dark(rgb(245 245 245), rgb(30 30 30));
+				--sjse-color-background-grouped-primary-level-2: light-dark(rgb(245 245 245), rgb(42 42 42));
+				--sjse-color-background-grouped-secondary: light-dark(rgb(255 255 255), rgb(30 30 30));
+				--sjse-color-background-grouped-secondary-level-1: light-dark(rgb(255 255 255), rgb(42 42 42));
+				--sjse-color-background-grouped-secondary-level-2: light-dark(rgb(255 255 255), rgb(54 54 54));
+				--sjse-color-background-grouped-tertiary: light-dark(rgb(245 245 245), rgb(42 42 42));
+				--sjse-color-background-grouped-tertiary-level-1: light-dark(rgb(245 245 245), rgb(54 54 54));
+				--sjse-color-background-grouped-tertiary-level-2: light-dark(rgb(245 245 245), rgb(65 65 65));
+
+				/*  ⌙ Border */
+				--sjse-color-border-border: light-dark(rgb(0 0 0 / 12%), rgb(255 255 255 / 0%));
+				--sjse-color-border-divider: light-dark(rgb(0 0 0 / 12%), rgb(255 255 255 / 20%));
+				--sjse-color-border-error: light-dark(rgb(222 31 38), rgb(222 75 81));
+				--sjse-color-border-focused: light-dark(rgb(27 150 186), rgb(81 198 232));
+				--sjse-color-border-input: light-dark(rgb(0 0 0 / 42%), rgb(255 255 255 / 42%));
+				--sjse-color-border-selected: light-dark(rgb(0 171 59), rgb(34 171 81));
+
+				/*  ⌙ Fill */
+				--sjse-color-fill-ang: light-dark(rgb(232 247 228), rgb(56 88 54));
+				--sjse-color-fill-backdrop: light-dark(rgb(0 0 0 / 40%), rgb(0 0 0 / 60%));
+				--sjse-color-fill-granit: light-dark(rgb(105 107 87), rgb(107 107 107));
+				--sjse-color-fill-gras: light-dark(rgb(98 219 90), rgb(139 219 134));
+				--sjse-color-fill-havtorn: light-dark(rgb(254 239 229), rgb(98 51 20));
+				--sjse-color-fill-himmel-1: light-dark(rgb(34 188 232), rgb(81 198 232));
+				--sjse-color-fill-himmel-2: light-dark(rgb(27 150 186), rgb(65 158 186));
+				--sjse-color-fill-hostlov: light-dark(rgb(245 98 0), rgb(245 127 49));
+				--sjse-color-fill-lov-1: light-dark(rgb(0 171 59), rgb(27 137 65));
+				--sjse-color-fill-lov-2: light-dark(rgb(0 137 47), rgb(20 103 49));
+				--sjse-color-fill-mossa: light-dark(rgb(232 247 246), rgb(32 79 93));
+				--sjse-color-fill-movingo-malarbla: rgb(0 70 165);
+				--sjse-color-fill-primary: light-dark(rgb(0 0 0 / 16%), rgb(255 255 255 / 20%));
+				--sjse-color-fill-quaternary: light-dark(rgb(0 0 0 / 4%), rgb(255 255 255 / 8%));
+				--sjse-color-fill-raps: light-dark(rgb(255 215 0), rgb(255 223 51));
+				--sjse-color-fill-sand: light-dark(rgb(249 244 207), rgb(102 89 20));
+				--sjse-color-fill-secondary: light-dark(rgb(0 0 0 / 12%), rgb(255 255 255 / 20%));
+				--sjse-color-fill-sj-arskort-guld: rgb(249 244 207);
+				--sjse-color-fill-sj-arskort-silver: rgb(245 245 238);
+				--sjse-color-fill-sjo: light-dark(rgb(0 116 154), rgb(31 124 154));
+				--sjse-color-fill-smultron: light-dark(rgb(252 233 233), rgb(89 30 32));
+				--sjse-color-fill-sno: light-dark(rgb(245 245 238), rgb(64 64 64));
+				--sjse-color-fill-svart: light-dark(rgb(0 0 0), rgb(255 255 255));
+				--sjse-color-fill-tertiary: light-dark(rgb(0 0 0 / 8%), rgb(255 255 255 / 12%));
+				--sjse-color-fill-varning: light-dark(rgb(222 31 38), rgb(178 60 65));
+				--sjse-color-fill-vit: light-dark(rgb(255 255 255), rgb(0 0 0));
+
+				/*  ⌙ Icon */
+				--sjse-color-icon-error: light-dark(rgb(222 31 38), rgb(222 75 81));
+				--sjse-color-icon-gras: light-dark(rgb(98 219 90), rgb(139 219 134));
+				--sjse-color-icon-himmel: light-dark(rgb(27 150 186), rgb(81 198 232));
+				--sjse-color-icon-hostlov-1: light-dark(rgb(245 98 0), rgb(245 127 49));
+				--sjse-color-icon-hostlov-2: light-dark(rgb(196 78 0), rgb(249 178 131));
+				--sjse-color-icon-lera: light-dark(rgb(165 125 76), rgb(206 174 136));
+				--sjse-color-icon-lov-1: light-dark(rgb(0 171 59), rgb(34 171 81));
+				--sjse-color-icon-lov-2: light-dark(rgb(0 137 47), rgb(122 205 151));
+				--sjse-color-icon-primary: light-dark(rgb(0 0 0), rgb(255 255 255));
+				--sjse-color-icon-primary-inverted: light-dark(rgb(255 255 255), rgb(0 0 0));
+				--sjse-color-icon-raps: light-dark(rgb(255 215 0), rgb(255 223 51));
+				--sjse-color-icon-secondary: light-dark(rgb(0 0 0 / 60%), rgb(255 255 255 / 60%));
+				--sjse-color-icon-tertiary: light-dark(rgb(0 0 0 / 42%), rgb(255 255 255 / 42%));
+
+				/*  ⌙ Miscellaneous */
+				--sjse-color-miscellaneous-chrome: light-dark(rgb(255 255 255), rgb(30 30 30));
+				--sjse-color-miscellaneous-chrome-level-1: light-dark(rgb(255 255 255), rgb(42 42 42));
+				--sjse-color-miscellaneous-chrome-level-2: light-dark(rgb(255 255 255), rgb(54 54 54));
+				--sjse-color-miscellaneous-chrome-prominent: light-dark(rgb(245 245 245), rgb(30 30 30));
+				--sjse-color-miscellaneous-frosted: light-dark(rgb(255 255 255 / 75%), rgb(30 30 30 / 75%));
+
+				/*  ⌙ Text */
+				--sjse-color-text-error: light-dark(rgb(222 31 38), rgb(255 255 255));
+				--sjse-color-text-himmel-1: light-dark(rgb(27 150 186), rgb(81 198 232));
+				--sjse-color-text-himmel-2: light-dark(rgb(20 113 139), rgb(81 198 232));
+				--sjse-color-text-hostlov-1: light-dark(rgb(245 98 0), rgb(245 127 49));
+				--sjse-color-text-hostlov-2: light-dark(rgb(196 78 0), rgb(249 178 131));
+				--sjse-color-text-link: light-dark(rgb(0 0 0), rgb(255 255 255));
+				--sjse-color-text-lov-1: light-dark(rgb(0 171 59), rgb(34 171 81));
+				--sjse-color-text-lov-2: light-dark(rgb(0 137 47), rgb(122 205 151));
+				--sjse-color-text-lov-3: light-dark(rgb(0 103 35), rgb(167 221 185));
+				--sjse-color-text-placeholder: light-dark(rgb(0 0 0 / 60%), rgb(255 255 255 / 60%));
+				--sjse-color-text-primary: light-dark(rgb(0 0 0), rgb(255 255 255));
+				--sjse-color-text-primary-inverted: light-dark(rgb(255 255 255), rgb(0 0 0));
+				--sjse-color-text-secondary: light-dark(rgb(0 0 0 / 60%), rgb(255 255 255 / 60%));
+				--sjse-color-text-tertiary: light-dark(rgb(0 0 0 / 42%), rgb(255 255 255 / 42%));
+
+				/*  ⌙ Nonadaptable */
+				--sjse-color-nonadaptable-dark-text: rgb(0 0 0);
+				--sjse-color-nonadaptable-light-text: rgb(255 255 255);
+
+				/* endregion Color */
+			}
+
+			@layer shadow {
+				/* region Shadow */
+
+				--sjse-shadow-default: 0 calc(2rem / var(--sjse-base-value)) calc(12rem / var(--sjse-base-value)) 0 rgb(0 0 0 / 10%);
+				--sjse-shadow-default-dark: 0 calc(8rem / var(--sjse-base-value)) calc(80rem / var(--sjse-base-value)) 0 rgb(0 0 0 / 60%);
+				--sjse-shadow-chrome-bottom: 0 calc(0.51rem / var(--sjse-base-value)) 0 0 rgb(0 0 0 / 30%);
+				--sjse-shadow-chrome-right: calc(0.51rem / var(--sjse-base-value)) 0 0 0 rgb(0 0 0 / 30%);
+				--sjse-shadow-chrome-top: 0 calc(-0.51rem / var(--sjse-base-value)) 0 0 rgb(0 0 0 / 30%);
+
+				@media (prefers-color-scheme: dark) {
+					--sjse-shadow-default: var(--sjse-shadow-default-dark);
+				}
+
+				&:where(.dark) {
+					--sjse-shadow-default: var(--sjse-shadow-default-dark);
+				}
+
+				/* endregion Shadow */
+			}
+
+			@layer typography {
+				/* region Typography
+				* Syntax: font-weight | font-style | font-size / line-height | font-family
+				* Font weights: 400 = normal, 500 = medium, 700 = bold
+				*/
+				--sjse-typography-body: normal calc(16rem / var(--sjse-base-value))/calc(24 / 16) var(--sjse-font-family);
+				--sjse-typography-body-emphasized: bold calc(16rem / var(--sjse-base-value))/calc(24 / 16) var(--sjse-font-family);
+				--sjse-typography-body-italic: italic normal calc(16rem / var(--sjse-base-value))/calc(24 / 16) var(--sjse-font-family);
+
+				--sjse-typography-body-mono: normal calc(16rem / var(--sjse-base-value))/calc(24 / 16) Menlo, 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
+
+				--sjse-typography-button: bold calc(19rem / var(--sjse-base-value))/calc(24 / 19) var(--sjse-font-family);
+
+				--sjse-typography-caption-1: normal calc(11rem / var(--sjse-base-value))/calc(16 / 11) var(--sjse-font-family);
+				--sjse-typography-caption-1-emphasized: bold calc(11rem / var(--sjse-base-value))/calc(16 / 11) var(--sjse-font-family);
+				--sjse-typography-caption-1-italic: italic normal calc(11rem / var(--sjse-base-value))/calc(16 / 11) var(--sjse-font-family);
+
+				--sjse-typography-caption-2: normal calc(10rem / var(--sjse-base-value))/calc(16 / 10) var(--sjse-font-family);
+				--sjse-typography-caption-2-emphasized: bold calc(10rem / var(--sjse-base-value))/calc(16 / 10) var(--sjse-font-family);
+				--sjse-typography-caption-2-italic: italic normal calc(10rem / var(--sjse-base-value))/calc(16 / 10) var(--sjse-font-family);
+
+				--sjse-typography-display-1: normal calc(66rem / var(--sjse-base-value))/calc(80 / 66) var(--sjse-font-family);
+				--sjse-typography-display-1-emphasized: bold calc(66rem / var(--sjse-base-value))/calc(80 / 66) var(--sjse-font-family);
+
+				--sjse-typography-display-2: normal calc(52rem / var(--sjse-base-value))/calc(64 / 52) var(--sjse-font-family);
+				--sjse-typography-display-2-emphasized: bold calc(52rem / var(--sjse-base-value))/calc(64 / 52) var(--sjse-font-family);
+
+				--sjse-typography-display-3: normal calc(41rem / var(--sjse-base-value))/calc(52 / 41) var(--sjse-font-family);
+				--sjse-typography-display-3-emphasized: bold calc(41rem / var(--sjse-base-value))/calc(52 / 41) var(--sjse-font-family);
+
+				--sjse-typography-footnote: normal calc(13rem / var(--sjse-base-value))/calc(20 / 13) var(--sjse-font-family);
+				--sjse-typography-footnote-emphasized: bold calc(13rem / var(--sjse-base-value))/calc(20 / 13) var(--sjse-font-family);
+				--sjse-typography-footnote-italic: italic normal calc(13rem / var(--sjse-base-value))/calc(20 / 13) var(--sjse-font-family);
+
+				--sjse-typography-headline: bold calc(16rem / var(--sjse-base-value))/calc(24 / 16) var(--sjse-font-family);
+
+				--sjse-typography-large-title: normal calc(32rem / var(--sjse-base-value))/calc(40 / 32) var(--sjse-font-family);
+				--sjse-typography-large-title-emphasized: bold calc(32rem / var(--sjse-base-value))/calc(40 / 32) var(--sjse-font-family);
+
+				--sjse-typography-subheadline: normal calc(14rem / var(--sjse-base-value))/calc(20 / 14) var(--sjse-font-family);
+				--sjse-typography-subheadline-emphasized: bold calc(14rem / var(--sjse-base-value))/calc(20 / 14) var(--sjse-font-family);
+				--sjse-typography-subheadline-italic: italic normal calc(14rem / var(--sjse-base-value))/calc(20 / 14) var(--sjse-font-family);
+
+				--sjse-typography-subheadline-mono: normal calc(14rem / var(--sjse-base-value))/calc(20 / 14) Menlo, 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
+
+				--sjse-typography-subtitle: 500 calc(18rem / var(--sjse-base-value))/calc(28 / 18) var(--sjse-font-family);
+				--sjse-typography-subtitle-emphasized: bold calc(18rem / var(--sjse-base-value))/calc(28 / 18) var(--sjse-font-family);
+
+				--sjse-typography-title-1: normal calc(26rem / var(--sjse-base-value))/calc(32 / 26) var(--sjse-font-family);
+				--sjse-typography-title-1-emphasized: bold calc(26rem / var(--sjse-base-value))/calc(32 / 26) var(--sjse-font-family);
+
+				--sjse-typography-title-2: normal calc(20rem / var(--sjse-base-value))/calc(28 / 20) var(--sjse-font-family);
+				--sjse-typography-title-2-emphasized: bold calc(20rem / var(--sjse-base-value))/calc(28 / 20) var(--sjse-font-family);
+
+				--sjse-typography-title-3: normal calc(18rem / var(--sjse-base-value))/calc(24 / 18) var(--sjse-font-family);
+				--sjse-typography-title-3-emphasized: bold calc(18rem / var(--sjse-base-value))/calc(24 / 18) var(--sjse-font-family);
+
+				/* endregion Typography */
+
+				/* This variable can be used to set the maximum inline size for text elements
+				   61rch is roughly 600px when the base font size is 16px */
+				--sjse-text-default-max-inline-size: 61rch;
+			}
+
+			/* Easings */
+			/* TODO: These are custom easings that hasn't been checked with Johan Beskow */
+			--sjse-easing-glide: linear(0, 0.015 1.1%, 0.058 2.4%, 0.422 9.9%, 0.53 12.6%, 0.62 15.3%, 0.702 18.4%, 0.771 21.7%, 0.828 25.3%, 0.875 29.3%, 0.912 33.7%, 0.94 38.6%, 0.978 51%, 0.994 68.4%, 1);
+			--sjse-easing-snap: linear(0, 0.007 0.5%, 0.027 1%, 0.115 2.2%, 0.66 7%, 0.779 8.2%, 0.877 9.4%, 0.955 10.6%, 1.016 11.9%, 1.056 13.2%, 1.07 13.9%, 1.081 14.7%, 1.085 15.3%, 1.088 16%, 1.087 16.7%, 1.084 17.5%, 1.073 19%, 1.032 23%, 1.013 25.3%, 0.999 27.9%, 0.993 30.8%, 0.993 33.7%, 0.999 41.5%, 1.001 46.8%, 1);
+
+			/* Outlines */
+			--sjse-outline-width: calc(2rem / var(--sjse-base-value));
+
+			/* Focus */
+			--sjse-focus-outline-width: calc(2rem / var(--sjse-base-value));
+			--sjse-focus-outline-extent: calc(var(--sjse-focus-outline-width) * 3);
+		}
+
+	}
+
+	@layer typography {
+
+		/* TODO: This is very much WIP. */
+		body {
+			font: var(--sjse-typography-body);
+
+			/* TODO: Should everything be pretty? */
+			text-wrap-style: pretty;
+		}
+
+		h1, h2, h3 {
+			text-wrap-style: balance;
+			margin: 0;
+		}
+
+		h1 {
+			font: var(--sjse-typography-large-title-emphasized);
+		}
+
+		h2 {
+			font: var(--sjse-typography-title-2-emphasized);
+		}
+
+		h3 {
+			font: var(--sjse-typography-title-3-emphasized);
+		}
+
+		p {
+			margin: var(--sjse-spacing-default) 0;
+		}
+	}
+
+	@layer containers {
+		:root {
+			--sjse-max-inline-size: var(--sjse-width-xl);
+			--sjse-margin-size: var(--sjse-spacing-default);
+			--sjse-number-of-grid-columns: 12;
+			--sjse-gutter-size: var(--sjse-spacing-default);
+
+			/* TODO (2026-08-10) Is this good? */
+
+			*:has(> [data-centered]) {
+				container-type: inline-size;
+			}
+		}
+	}
+}

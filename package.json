@@ -1,0 +1,20 @@
+{
+  "name": "sj-ui-sdk",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/sj-ui",
+    "apps/demo"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w apps/demo",
+    "build": "npm run build -w apps/demo",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "sync": "npm run sync -w packages/sj-ui",
+    "storybook": "npm --prefix apps/storybook run storybook"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

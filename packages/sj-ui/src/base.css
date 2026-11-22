@@ -1,0 +1,44 @@
+/*
+ * Base for sj-ui. sj-global-styles reads --sjse-base-value and --sjse-font-family,
+ * but doesn't define them: KB's MUI theme sets them at runtime. Without MUI we set them here.
+ */
+@layer sj-base {
+  :root {
+    --sjse-base-value: 16;
+    --sjse-font-family: "sj_sans", system-ui, sans-serif;
+  }
+  /* sj-global-styles switches to the dark shadow on .dark and the OS setting. KB's theme picks the
+     scheme itself, so we also follow data-color-scheme on <html>, as the components do. */
+  :root[data-color-scheme="dark"] { --sjse-shadow-default: var(--sjse-shadow-default-dark); }
+  :root[data-color-scheme="light"] { --sjse-shadow-default: 0 calc(2rem / var(--sjse-base-value)) calc(12rem / var(--sjse-base-value)) 0 rgb(0 0 0 / 10%); }
+
+  .sj-visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+@layer sj-components {
+  /*
+   * The focus ring, as KB's MUI theme sets it on :root (themeOptions.js, focusVisibleStyles):
+   * a 2 px outline in border-focused, offset by its width, with a halo in the background color.
+   * !important like KB. It sits in the sj-components layer, not sj-base, because an !important
+   * in an earlier layer would beat the components' own !important resets.
+   */
+  :root {
+    --sjse-focus-outline-width: calc(2rem / 16);
+    --sjse-focus-outline-offset: var(--sjse-focus-outline-width);
+  }
+  :root *:focus-visible {
+    outline: var(--sjse-focus-outline-width) solid var(--sjse-color-border-focused) !important;
+    outline-offset: var(--sjse-focus-outline-offset) !important;
+    box-shadow: 0 0 0 calc(var(--sjse-focus-outline-width) * 3) var(--sjse-color-background-primary) !important;
+  }
+}

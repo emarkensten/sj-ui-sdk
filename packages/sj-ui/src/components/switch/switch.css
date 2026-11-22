@@ -1,0 +1,98 @@
+/*
+ * Switch: a port of KB's switch (ui.switch 6.x, Switch.styles.js). 64×28 track, 38×24 thumb,
+ * the I/O symbols drawn with the same clip-path, the same snap-back easing and hover halo.
+ */
+@layer sj-components {
+  .sj-switch {
+    --sj-switch-inset: calc(24rem / 16);
+    --sj-switch-minor-inset: calc(2rem / 16);
+    --accent-color: var(--sjse-color-border-input);
+    --hover-base-color: var(--sjse-color-nonadaptable-dark-text);
+    --hover-color: rgb(from var(--hover-base-color) r g b / 0%);
+
+    all: unset;
+    box-sizing: border-box;
+    position: relative;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: end;
+    width: 4rem;
+    height: 1.75rem;
+    border-radius: var(--sjse-border-radius-capsule);
+    background: var(--accent-color);
+    cursor: pointer;
+    transition: background-color 0.25s;
+    -webkit-tap-highlight-color: transparent;
+
+    /* The I (on) and O (off) symbols, same path as KB. */
+    &::before {
+      content: "";
+      display: block;
+      position: relative;
+      right: calc(10rem / 16);
+      width: calc(40rem / 16);
+      height: calc(10rem / 16);
+      background-color: var(--sjse-color-nonadaptable-light-text);
+      clip-path: path("M39 5a4 4 0 1 0-4 4v1a5 5 0 1 1 0-10 5 5 0 0 1 0 10V9a4 4 0 0 0 4-4M0 .5a.5.5 0 0 1 1 0v9a.5.5 0 0 1-1 0z");
+    }
+
+    &[data-checked]:not([data-disabled]) { --accent-color: var(--sjse-color-fill-lov-1); }
+    &[data-disabled] { opacity: var(--sjse-opacity-disabled); cursor: not-allowed; }
+    &[data-readonly] { cursor: default; }
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover:not([data-disabled], :focus-visible) { --hover-color: rgb(from var(--hover-base-color) r g b / var(--sjse-opacity-hovered)); }
+      &:active:not([data-disabled], :focus-visible) { --hover-color: rgb(from var(--hover-base-color) r g b / var(--sjse-opacity-pressed)); }
+    }
+
+  }
+
+  .sj-switch__thumb {
+    position: absolute;
+    inset-block: var(--sj-switch-minor-inset);
+    inset-inline: var(--sj-switch-minor-inset) var(--sj-switch-inset);
+    border-radius: var(--sjse-border-radius-capsule);
+    background-color: var(--sjse-color-nonadaptable-light-text);
+    outline: var(--sjse-spacing-x1) solid var(--hover-color);
+    transition: inset 0.25s linear(0, 0.03 1.1%, 0.125 2.4%, 0.906 9.8%, 1.046 12.3%, 1.11 15%, 1.116 16.3%, 1.11 17.8%, 1.014 25.8%, 0.987 31.2%, 1.001 47.2%, 1);
+
+    &[data-checked] { inset-inline: var(--sj-switch-inset) var(--sj-switch-minor-inset); }
+  }
+
+  /* A whole settings row: label and switch. The row takes hover and the focus ring, as in KB. */
+  .sj-switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sjse-spacing-default);
+    min-height: 3.25rem;
+    padding-inline: var(--sjse-spacing-x1_5);
+    border-radius: var(--sjse-border-radius-default);
+    cursor: pointer;
+    font: var(--sjse-typography-body);
+    color: var(--sjse-color-text-primary);
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &[data-label-placement="end"] { flex-direction: row-reverse; justify-content: flex-end; }
+    @media (hover: hover) { &:hover:not(:has([data-disabled])) { background-color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered)); } }
+    &:active:not(:has([data-disabled])) { background-color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-pressed)); }
+    &:has(:focus-visible) {
+      outline: var(--sjse-focus-outline-width) solid var(--sjse-color-border-focused);
+      outline-offset: var(--sjse-focus-outline-width);
+      box-shadow: 0 0 0 var(--sjse-focus-outline-extent) var(--sjse-color-background-primary);
+      /* !important like KB's focusResetStyles: KB apps set a global :focus-visible ring with !important. */
+      & :focus-visible { outline: none !important; box-shadow: none !important; }
+    }
+  }
+
+  .sj-switch-row__text { display: grid; gap: 2px; }
+  .sj-switch-row__description {
+    font: var(--sjse-typography-subheadline, var(--sjse-typography-body));
+    color: var(--sjse-color-text-secondary);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sj-switch, .sj-switch__thumb, .sj-switch-row { transition: none; }
+  }
+}

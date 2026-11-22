@@ -1,0 +1,161 @@
+/*
+ * Outlined field: a port of KB's MUI theme overrides (styles.themes, themeOptions.js:
+ * MuiInputLabel, MuiOutlinedInput, MuiFormHelperText). 56 px, radius 16 px, 1 px border-input,
+ * hover fills the box with action.hover, focus draws a 2 px border-focused border and colors
+ * the floating label. The floating label is 16 px scaled to 0.75, exactly as MUI does.
+ */
+@layer sj-components {
+  .sj-field {
+    position: relative;
+    display: inline-grid;
+    min-width: 12rem;
+    font: var(--sjse-typography-body);
+    color: var(--sjse-color-text-primary);
+
+    &[data-full-width] { display: grid; width: 100%; }
+  }
+
+  .sj-field__box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 3.5rem;
+    border-radius: var(--sjse-border-radius-default);
+    background: transparent;
+    cursor: text;
+  }
+  @media (hover: hover) {
+    .sj-field:not([data-disabled]) .sj-field__box:hover { background-color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered)); }
+  }
+
+  .sj-field__outline {
+    position: absolute;
+    inset: -5px 0 0;
+    margin: 0;
+    padding: 0 0.5rem;
+    pointer-events: none;
+    border: 1px solid var(--sjse-color-border-input);
+    border-radius: inherit;
+    min-width: 0;
+    overflow: hidden;
+    text-align: left;
+
+    & legend {
+      float: unset;
+      width: auto;
+      max-width: 0.01px;
+      height: 11px;
+      padding: 0;
+      font-size: 0.75em;
+      visibility: hidden;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: max-width 50ms cubic-bezier(0, 0, 0.2, 1);
+
+      & > span { display: inline-block; padding: 0 5px; opacity: 0; visibility: visible; }
+    }
+  }
+
+  /* The label: inside the box when empty, floating in the notch when filled or focused. */
+  .sj-field__label {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    max-width: calc(100% - 2rem);
+    transform: translate(1rem, 1rem) scale(1);
+    transform-origin: top left;
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font: var(--sjse-typography-body);
+    color: var(--sjse-color-text-secondary);
+    transition: color 200ms cubic-bezier(0, 0, 0.2, 1), transform 200ms cubic-bezier(0, 0, 0.2, 1), max-width 200ms cubic-bezier(0, 0, 0.2, 1);
+
+    .sj-field[data-has-start] & { transform: translate(3.5rem, 1rem) scale(1); }
+  }
+
+  .sj-field:is([data-filled], :focus-within, :has([data-open])) {
+    & .sj-field__label {
+      transform: translate(0.875rem, -0.5625rem) scale(0.75);
+      max-width: calc(133% - 2rem);
+    }
+    & .sj-field__outline legend { max-width: 100%; transition: max-width 100ms cubic-bezier(0, 0, 0.2, 1) 50ms; }
+  }
+
+  .sj-field:is(:focus-within, :has([data-open])):not([data-invalid]) .sj-field__label { color: var(--sjse-color-border-focused); }
+
+  /* External label: KB's hasExternalLabel, body text above the field with 16 px between. */
+  .sj-field[data-external-label] {
+    row-gap: var(--sjse-spacing-default);
+    & .sj-field__label {
+      position: static;
+      transform: none !important;
+      max-width: none;
+      font: var(--sjse-typography-body);
+      color: var(--sjse-color-text-primary) !important;
+    }
+    & .sj-field__outline { inset: 0; }
+    & .sj-field__outline legend { display: none; }
+  }
+
+  .sj-field:focus-within .sj-field__outline,
+  .sj-field:has([data-open]) .sj-field__outline {
+    border-width: 2px;
+    border-color: var(--sjse-color-border-focused) !important;
+  }
+  /* KB draws no outline ring on text fields: the 2 px border is the focus indicator. A button in
+     the field that keeps the global ring opts out with data-focus-ring. */
+  .sj-field :focus-visible:not([data-focus-ring]) { outline: none !important; box-shadow: none !important; }
+
+  @media (prefers-contrast: more) {
+    .sj-field__outline { border-width: 2px; }
+    .sj-field:focus-within .sj-field__outline { border-width: 4px; }
+  }
+  @media (forced-colors: active) {
+    .sj-field:focus-within .sj-field__outline { border-width: 4px; }
+  }
+
+  .sj-field[data-invalid] {
+    & .sj-field__outline { border-color: var(--sjse-color-border-error) !important; }
+    &:is([data-filled], :focus-within) .sj-field__label { color: var(--sjse-color-text-error); }
+  }
+
+  .sj-field[data-disabled] {
+    & .sj-field__label { color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-disabled)); }
+    & .sj-field__box { cursor: default; color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-disabled)); }
+  }
+
+  .sj-field__start,
+  .sj-field__end {
+    display: grid;
+    place-items: center;
+    flex: none;
+    color: var(--sjse-color-text-primary);
+    & svg { width: 1.5rem; height: 1.5rem; }
+  }
+  .sj-field__start { padding-left: 1rem; padding-right: 0.75rem; }
+  .sj-field__end { padding-right: 1rem; padding-left: 0.75rem; }
+
+  /* Helper text: KB's MuiFormHelperText. Subheadline in text-primary, 8 px above, a warning icon when invalid. */
+  .sj-field__helper {
+    display: inline-flex;
+    margin: var(--sjse-spacing-x1) 0 0;
+    font: var(--sjse-typography-subheadline);
+    color: var(--sjse-color-text-primary);
+
+    .sj-field[data-invalid] & {
+      color: var(--sjse-color-text-error);
+      &::before {
+        content: "";
+        flex: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-right: var(--sjse-spacing-x1);
+        background-color: var(--sjse-color-icon-error, var(--sjse-color-text-error));
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M9 11h2V8H9v3Zm1 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z'/%3E%3Cpath fill-rule='evenodd' d='m11.696 3.82 6.391 10.226a2 2 0 0 1-1.695 3.06H3.609a2 2 0 0 1-1.696-3.06L8.304 3.82a2 2 0 0 1 3.392 0ZM10 5.106l-6 10h12l-6-10Z'/%3E%3C/svg%3E") center / contain no-repeat;
+      }
+    }
+  }
+}
