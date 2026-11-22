@@ -41,7 +41,7 @@ export const components = {
   },
   DepartureCard: {
     flows: { "Tab, Enter, Tab": ["Tab", "Enter", "Tab"] },
-    vo: { stories: ["Bokningsbar", "Slutsåld", "Inställd", "Nattåg", "Utan pris", "Reseklasser"], keys: ["VO:act"] },
+    vo: { stories: ["Bokningsbar", "Slutsåld", "Inställd", "Nattåg", "Utan pris", "Reseklasser", "Med länk"], keys: ["VO:act"] },
   },
 };
 

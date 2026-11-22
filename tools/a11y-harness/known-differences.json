@@ -4,5 +4,34 @@
     "story": "Oppna Stang",
     "match": ".*",
     "reason": "Egen onOpen/onClose: KB:s lista öppnas aldrig, sj-ui öppnar den (docs/avsiktliga-skillnader.md)."
+  },
+  {
+    "component": "DepartureCard",
+    "story": "Euro",
+    "match": "pris från 49,5",
+    "reason": "KB läser euro som svenska kronor, sj-ui säger \"49,50 euro\" (docs/avsiktliga-skillnader.md)."
+  },
+  {
+    "component": "DepartureCard",
+    "story": "Utan Prefix",
+    "match": "pris (från )?495",
+    "reason": "hidePricePrefix: sj-ui läser det som syns, \"pris 495\" (docs/avsiktliga-skillnader.md)."
+  },
+  {
+    "component": "DepartureCard",
+    "story": "Utan Pris",
+    "match": "ankommer 10:05, (pris , )?Restiden",
+    "reason": "KB:s kända brist \"pris ,\" är rättad (docs/avsiktliga-skillnader.md)."
+  },
+  {
+    "component": "DepartureCard",
+    "story": "Inaktiverad",
+    "match": "Avgår 07:10",
+    "reason": "disabled når knappen i sj-ui, som läses som nedtonad (docs/avsiktliga-skillnader.md)."
+  },
+  {
+    "component": "DatePicker",
+    "match": "Föregående månad",
+    "reason": "Pilen är spärrad i gränsmånaden (docs/avsiktliga-skillnader.md)."
   }
 ]
