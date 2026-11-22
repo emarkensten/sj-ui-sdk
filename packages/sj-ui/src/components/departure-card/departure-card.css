@@ -69,7 +69,8 @@
     &[data-disabled] { cursor: default; }
   }
 
-  .sj-departure-card__visual { display: block; }
+  /* KB's Typography breaks long words rather than overflow, which also lets both sides of the row shrink. */
+  .sj-departure-card__visual { display: block; overflow-wrap: break-word; word-break: break-word; }
 
   .sj-departure-card[data-unavailable] .sj-departure-card__dim {
     opacity: var(--sjse-opacity-disabled);
@@ -97,7 +98,7 @@
     justify-content: space-between;
     column-gap: 0.5rem;
   }
-  .sj-departure-card__main { display: block; min-width: 0; }
+  .sj-departure-card__main { display: block; }
   .sj-departure-card__side { display: flex; flex-direction: column; }
   .sj-departure-card__divider,
   .sj-departure-card__chevron,
@@ -106,6 +107,7 @@
 
   .sj-departure-card__time {
     display: flex;
+    hyphens: manual;
     flex-wrap: wrap;
     padding-block: 0.25rem;
     font: var(--sjse-typography-title-1-emphasized);
@@ -196,6 +198,7 @@
   /* KB's PriceText: subheadline, 4 px above, right-aligned. */
   .sj-departure-card__price-text {
     display: block;
+    white-space: nowrap; /* inside KB's nowrap price box */
     margin-top: var(--sjse-spacing-x0_5);
     font: var(--sjse-typography-subheadline);
     text-align: right;
@@ -238,7 +241,7 @@
     @media (forced-colors: active) { background: CanvasText; forced-color-adjust: none; }
   }
   /* KB's price placeholder sits in a body-sized line, right-aligned. */
-  .sj-departure-card__price-loading { display: flex; justify-content: end; font: var(--sjse-typography-body); }
+  .sj-departure-card__price-loading { display: flex; justify-content: end; margin-left: 0.5rem; font: var(--sjse-typography-body); }
   .sj-departure-card__comfort .sj-skeleton { font: var(--sjse-typography-subheadline); }
   @keyframes sj-skeleton-wave { 60%, 100% { transform: translateX(100%); } }
 
@@ -256,7 +259,7 @@
     text-underline-offset: 0.1em;
     cursor: pointer;
     /* MUI's Link as a <button> */
-    &:is(button) { vertical-align: middle; }
+    &:is(button) { vertical-align: middle; text-align: center; }
     pointer-events: auto;
     @media (hover: hover) and (pointer: fine) {
       &:hover { background: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered)); }
@@ -310,13 +313,13 @@
     .sj-departure-card:not([data-size]) { & .sj-departure-card__details[data-at="large"] { display: block; } & .sj-departure-card__comfort[data-at="large"] { display: flex; } }
   }
 
-  /* medium: details under the whole row, without their top margin; KB gives the duration 16px below it under 600px. */
+  /* medium: details under the whole row, without their top margin; KB gives the duration 16px below it between 360 and 600px (measured). */
   .sj-departure-card[data-size="medium"] {
     & .sj-departure-card__details[data-at="medium"] { display: block; }
     & .sj-departure-card__comfort[data-at="compact"] { display: flex; }
     & .sj-departure-card__vehicles { margin-top: 0; }
   }
-  @media (max-width: 599.95px) {
+  @media (min-width: 22.5rem) and (max-width: 599.95px) {
     .sj-departure-card[data-size="medium"] .sj-departure-card__duration { margin-bottom: var(--sjse-spacing-default); }
   }
   @media (min-width: 22.5rem) and (max-width: 599.95px) {
