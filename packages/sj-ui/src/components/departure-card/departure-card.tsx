@@ -340,7 +340,7 @@ export function DepartureCard({
             <span>{`${depTime}${copy.separator}`}</span>
             <span>{arrTime}</span>
           </Time>
-          <span aria-hidden={durationLink ? undefined : true} className="sj-departure-card__duration sj-departure-card__dim">
+          <span aria-hidden={durationLink ? undefined : true} role={durationLink ? "paragraph" : undefined} className="sj-departure-card__duration sj-departure-card__dim">
             {durationLink ? <DurationLink {...durationLink} describedBy={`${uid}-desc`} label={durationText} /> : durationText}
           </span>
           {badge && (
@@ -430,7 +430,8 @@ export function DepartureCard({
       {durationLink && visual}
       {durationLink && footerEl}
       {durationLink && (
-        <span id={`${uid}-desc`} className="sj-visually-hidden">{`${spoken}, ${copy.travelDetails}`}</span>
+        // hidden: only read through aria-describedby, not again as text after the card.
+        <span id={`${uid}-desc`} hidden>{`${spoken}, ${copy.travelDetails}`}</span>
       )}
       {children}
     </div>
