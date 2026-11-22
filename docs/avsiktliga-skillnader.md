@@ -38,3 +38,5 @@ Skärmläsartexten är KB:s ord för ord, med samma kommatecken och tågnumret f
 | Pris i euro | "49,5 svenska kronor" | "49,50 euro" | Fel valuta. |
 | `hidePricePrefix` | Prefixet döljs men läses ändå: "pris från 495". | "pris 495", som det synliga. | Skärmläsaren ska säga det som står. |
 | Utan pris (`showPrice` och `showPoints` av) | "pris ," | Ingenting om pris. | KB:s kända brist. |
+
+Ett fel i beteendet är också rättat: med `disabled` går KB:s kort fortfarande att klicka på, eftersom prop:en aldrig når kortets knapp, och skärmläsaren säger inte att kortet är inaktivt. I sj-ui anropas inte `onClick`, och knappen läses som nedtonad. Kortet går fortfarande att nå med Tab, som i KB.
