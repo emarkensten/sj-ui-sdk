@@ -557,10 +557,13 @@ const LegacyCalendar = forwardRef(function LegacyCalendar(p: LegacyCalendarProps
             </CalendarWeekdays>
             <CalendarWeeks className="sj-legacy-cal__weeks">
               {(cell) => {
-                // The number is hidden so VoiceOver reads only the label, once, as with KB.
+                // As KB: the number is hidden and the spoken label is text in the cell, so VoiceOver
+                // has content to read and does not add "tomt" after the name.
+                const label = dayLabel(cell.date);
                 const day = (
-                  <CalendarDay value={cell.date} className="sj-legacy-cal__day" aria-label={dayLabel(cell.date)}>
+                  <CalendarDay value={cell.date} className="sj-legacy-cal__day" aria-label={label}>
                     <span aria-hidden="true">{Number(cell.date.slice(8))}</span>
+                    <span className="sj-visually-hidden">{label}</span>
                   </CalendarDay>
                 );
                 // MUI renders hidden days too, so the first week has its number even when it starts

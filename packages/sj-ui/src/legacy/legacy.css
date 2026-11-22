@@ -260,6 +260,7 @@
     border-bottom: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-border-divider);
   }
   .sj-legacy-menu__title { margin: 0; padding-right: 3rem; font: var(--sjse-typography-title-1-emphasized); }
+  .sj-legacy-menu__nav { display: contents; }
   .sj-legacy-menu__close {
     all: unset;
     position: absolute;
