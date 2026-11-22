@@ -307,6 +307,8 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
             aria-required={required}
             aria-describedby={cx(describedBy, helperId)}
             autoFocus={autoFocus}
+            // As MUI: an explicit tabindex, so Safari's Tab reaches the field.
+            tabIndex={disabled ? -1 : ((SelectDisplayProps as { tabIndex?: number } | undefined)?.tabIndex ?? 0)}
           >
             <span className="sj-select__value">{displayNode}</span>
             <Icon className="sj-select__chevron" data-open={isOpenNow || undefined} />
@@ -316,10 +318,13 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
             style={{ ...menu?.style, ...menu?.PaperProps?.style, ...menu?.slotProps?.paper?.style }}
             data-density={menuDensity}
             data-auto-width={autoWidth || undefined}
-            role={mobile ? undefined : "presentation"}
+            // KB: a plain menu on desktop, a dialog named by its heading as a sheet on mobile.
+            role={mobile ? "dialog" : "presentation"}
+            aria-modal={mobile || undefined}
+            aria-labelledby={mobile ? `${labelId}-sheet-title` : undefined}
           >
             <div className="sj-legacy-menu__header">
-              <h1 className="sj-legacy-menu__title">{labelText}</h1>
+              <h1 className="sj-legacy-menu__title" id={`${labelId}-sheet-title`}>{labelText}</h1>
               <button type="button" className="sj-legacy-menu__close" aria-label={closeLabel[lang]} onClick={(e) => {
                 if (open === undefined) setInnerOpen(false);
                 onClose?.(e);
@@ -343,6 +348,8 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
                     className={cx("sj-legacy-menu-item", p.className)}
                     style={p.style}
                     data-variant={p.variant ?? "standard"}
+                    // KB's rows with a radio, switch or checkbox also expose aria-checked.
+                    aria-checked={p.variant && p.variant !== "standard" ? selected : undefined}
                     {...customAttr(p.customAttribute)}
                   >
                     {p.customLayout ? p.children : <MenuItemLayout variant={p.variant} selected={selected}>{p.children}</MenuItemLayout>}

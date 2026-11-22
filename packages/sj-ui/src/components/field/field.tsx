@@ -87,7 +87,7 @@ export function OutlinedField({
       </div>
       {message &&
         (error ? (
-          <FieldError match={true} className="sj-field__helper">
+          <FieldError match={true} className="sj-field__helper" render={<p />}>
             {message}
           </FieldError>
         ) : (
