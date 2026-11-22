@@ -167,6 +167,11 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
         if (typeof v === "string" || typeof v === "number") node.setAttribute(k, String(v));
       }
     }
+    // KB's label is tied to the field only by aria-labelledby. With `for` too, VoiceOver in
+    // Safari reads the label twice once the list is open.
+    // ui-sdk adds it after mount, hence the frame.
+    const root = rootRef.current;
+    if (!native) requestAnimationFrame(() => root?.querySelector(`label[id="${labelId}"]`)?.removeAttribute("for"));
     if (!inputRef) return;
     const trigger = rootRef.current?.querySelector<HTMLElement>("[role=combobox]");
     const handle = { node, value: current, focus: () => trigger?.focus() };

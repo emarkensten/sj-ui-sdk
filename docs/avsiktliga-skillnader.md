@@ -19,6 +19,7 @@ Allt annat i Select, även MUI:s regler för att jämföra värden (`2` och `"2"
 | Knappen Klar (med `showActionButtons`) | Sparar datumet men låter kalendern stå öppen. Den stängs först med Escape eller ett klick utanför. | Sparar datumet och stänger kalendern. | En knapp som heter Klar och inte stänger något ser trasig ut. |
 | `onAccept` vid ett klick i kalendern | Anropas två gånger med samma datum. | Anropas en gång. | Dubbla anrop ger dubbla sökningar eller loggrader hos teamen. |
 | Föregående månad vid `minDate` eller `disablePast` | Går att bläddra till månaden före gränsen, där alla dagar är spärrade. | Pilen är spärrad i gränsmånaden. | En månad utan valbara dagar är en återvändsgränd. Felet kommer från MUI. |
+| Kalenderknappens namn i VoiceOver (Safari) | Läses bara som "popupknapp", utan namn, fast knappen har samma `aria-label` som i sj-ui. | Läses med namnet: "Valt datum tisdag 24 november 2026, Tryck för att öppna kalendern". | En knapp utan namn går inte att förstå med skärmläsare. Det är samma text som KB redan har i koden. |
 
 Två fel i KB är kvar med flit, eftersom team kan ha byggt runt dem:
 
