@@ -61,28 +61,36 @@ const WEB_AREA = /webbinnehåll|web content|html[- ]innehåll|html content/i;
 const SAFARI_UI = /verktygsfält|toolbar|avdelare|splitter|flikfält|tab bar|adressfält|smart search|sidofält|sidebar/i;
 
 /**
- * Open the story and put VoiceOver inside the page: step through Safari's interface until VoiceOver
- * reaches the web content, then interact with it (VO-Shift-Down). Returns false if it never got there.
+ * Open the story and put VoiceOver inside the page, whatever Safari's toolbar holds (extensions etc.).
+ *
+ * Moving the VoiceOver cursor to keyboard focus is not enough: after a page is loaded through
+ * AppleScript, Safari keeps keyboard focus in its toolbar (VoiceOver lands on "Fliköversikt"), and
+ * VO-Right inside the toolbar group only bounces between its last item and silence. So: leave the
+ * current group (VO-Shift-Up), step with VO-Right until VoiceOver says "webbinnehåll", and interact
+ * with it (VO-Shift-Down). If VoiceOver goes round in circles, leave one more level and try again.
+ * Returns false if it never got there.
  */
 async function enterPage(voiceOver, macOSActivate, url) {
   safari(url);
   await sleep(2500);
   await macOSActivate("Safari");
   await sleep(300);
-  // The story puts keyboard focus just before the component (see preview.tsx). Move the VoiceOver
-  // cursor there: that lands inside the page whatever Safari's toolbar holds (extensions and so on).
   await voiceOver.perform(voiceOver.keyboardCommands.moveCursorToKeyboardFocus).catch(() => {});
   await sleep(300);
-  const here = tidy(await voiceOver.lastSpokenPhrase());
-  if (!SAFARI_UI.test(here) && !/menyknapp|menu button|flik|tab\b/i.test(here)) return true;
-  // Fallback: step through Safari's interface to the web content and interact with it.
-  for (let i = 0; i < 60; i++) {
-    await voiceOver.next();
-    const phrase = tidy(await voiceOver.lastSpokenPhrase());
-    if (WEB_AREA.test(phrase)) {
-      await voiceOver.interact();
-      await sleep(400);
-      return true;
+  for (let level = 0; level < 3; level++) {
+    await voiceOver.stopInteracting().catch(() => {});
+    await sleep(300);
+    let phrase = tidy(await voiceOver.lastSpokenPhrase());
+    const seen = new Map();
+    for (let i = 0; i <= 60; i++) {
+      if (WEB_AREA.test(phrase)) {
+        await voiceOver.interact();
+        await sleep(400);
+        return true;
+      }
+      if (phrase && (seen.set(phrase, (seen.get(phrase) ?? 0) + 1).get(phrase) ?? 0) >= 3) break; // going round in circles
+      await voiceOver.next();
+      phrase = tidy(await voiceOver.lastSpokenPhrase());
     }
   }
   return false;
@@ -140,7 +148,11 @@ export async function runVoiceOver({ base, targets, log = console.log }) {
             await sleep(900);
             let spoken = (await voiceOver.spokenPhraseLog()).map(tidy).filter(Boolean);
             if (!spoken.length) spoken = [tidy(await voiceOver.lastSpokenPhrase())].filter(Boolean);
-            entry.keys.push({ key: vokey(key), spoken, outsidePage: spoken.some((p) => SAFARI_UI.test(p)) });
+            // VoiceOver often announces a state change (expanded, selected) without it reaching the
+            // spoken phrase log. Then record what VoiceOver would say for the item under its cursor now.
+            const cursor = tidy(await voiceOver.itemText().catch(() => ""));
+            if (!spoken.length && cursor) spoken = [`[VO-markören] ${cursor}`];
+            entry.keys.push({ key: vokey(key), spoken, cursor, outsidePage: spoken.some((p) => SAFARI_UI.test(p)) });
           }
         } catch (e) {
           entry.error = e.message.split("\n")[0];
