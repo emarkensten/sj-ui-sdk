@@ -36,7 +36,7 @@ export function NewApiPage() {
         </Typography>
         <div className="list">
           {list.map(({ id, ...d }) => (
-            <DepartureCard key={id} {...d} headingLevel={3} selected={chosen === id} onClick={() => setChosen(id)} />
+            <DepartureCard key={id} {...d} selected={chosen === id} onClick={() => setChosen(id)} />
           ))}
         </div>
       </section>

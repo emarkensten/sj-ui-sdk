@@ -1,27 +1,43 @@
 /*
- * Legacy DepartureCard: KB's props on the new DepartureCard.
+ * Legacy DepartureCard: KB's props on the new DepartureCard, one to one.
  * Drop-in for `@sj-ab/component-library.ui.departure-card`.
  *
- * Behaviour change on purpose: `disabled` (and an unavailable departure) now stops clicks.
- * In KB, disabled never reached the CardActionArea, so sold-out departures could be chosen.
+ * Deliberate difference: `disabled` stops clicks. In KB it never reached the CardActionArea,
+ * so a disabled card could still be chosen. Unavailable departures stay clickable, as in KB.
  */
 import type { ReactNode } from "react";
-import { DepartureCard as NewDepartureCard, type Amenity, type DepartureAvailability } from "../components/departure-card/departure-card";
-import { cx } from "../lib/cx";
+import {
+  DepartureCard as NewDepartureCard,
+  type Amenity,
+  type BadgeColor,
+  type ComfortCategory,
+  type DepartureAvailability,
+  type DepartureCardText,
+  type PriceTextType,
+} from "../components/departure-card/departure-card";
+import { comfortCategories, unavailableReasons } from "../components/departure-card/text";
 import { resolveLang } from "../lib/i18n";
-import { warnOnce, warnUnsupported } from "../lib/warn";
 import { customAttr, legacyMarker, type CustomAttribute } from "./shared";
 
-type TransportationType = { concept?: string; id: string; producer?: string; productName: string; serviceBrandName?: string; transportMethod?: string; transportMethodDescription?: string };
-type TransportInformationType = { code: string; id?: string };
+type TransportationType = {
+  concept?: string;
+  id: string;
+  producer?: string;
+  productName?: string;
+  serviceBrandName?: string;
+  transportMethod?: string;
+  transportMethodDescription?: string;
+};
+type ComfortAvailability = { category: ComfortCategory; isAvailable: boolean; soldOut: boolean };
+type LinkProps = { href?: string; onClick?: () => void; component?: unknown; [key: string]: unknown };
 
 export interface DepartureCardProps {
   departureDate: Date;
   arrivalDate: Date;
-  duration?: { days: string; hours: string; minutes: string };
+  duration?: { days?: string | number; hours?: string | number; minutes?: string | number };
   transportations: TransportationType[];
-  transportInformations?: TransportInformationType[];
-  availability?: string;
+  transportInformations?: { code: string; id?: string }[];
+  availability?: DepartureAvailability;
   active?: boolean;
   disabled?: boolean;
   onClick: () => void;
@@ -31,12 +47,27 @@ export interface DepartureCardProps {
   points?: number;
   pricePrefix?: "from" | "addFrom" | "add";
   hidePricePrefix?: boolean;
+  priceType?: "standard" | "lowPrice";
+  currency?: "SEK" | "EUR";
+  disabledPrice?: boolean;
+  isLoadingPrice?: boolean;
+  priceText?: string;
+  priceTextType?: PriceTextType;
+  secondaryPriceText?: string;
+  secondaryPriceTextType?: PriceTextType;
+  hasComfortAvailabilities?: boolean;
+  comfortAvailabilities?: ComfortAvailability[];
   captionText?: string;
   captionIcon?: "moon";
   captionSrText?: string;
+  captionColor?: "textPrimary" | "highlighted";
   badgeLabel?: string;
-  badgeColor?: string;
-  timeLabelTypographyElement?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | string;
+  badgeColor?: BadgeColor;
+  durationLink?: LinkProps;
+  size?: "small" | "medium" | "large";
+  borderRadiusOverride?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "default";
+  adjustLeft?: boolean;
+  translation?: Record<string, string>;
   timeZone?: string;
   lang?: string;
   className?: string;
@@ -45,36 +76,38 @@ export interface DepartureCardProps {
   limitClickArea?: boolean;
   limitedClickAreaSlot?: ReactNode;
   children?: ReactNode;
-  /** Accepted, no visual effect in the pilot. */
-  size?: "small" | "medium" | "large";
-  elevation?: number;
   CardActionAreaProps?: Record<string, unknown>;
   ClickableCardProps?: Record<string, unknown>;
-  /** Not supported in the pilot. */
-  durationLink?: unknown;
-  translation?: unknown;
-  isLoadingPrice?: boolean;
-  priceText?: string;
-  secondaryPriceText?: string;
-  hasComfortAvailabilities?: boolean;
-  comfortAvailabilities?: unknown[];
-  disabledPrice?: boolean;
-  captionColor?: string;
+  /** Renders the time in this element. KB hides it from screen readers, so it only changes the tag. */
+  timeLabelTypographyElement?: string;
+  /** KB's card has no shadow at any elevation, so this has no visible effect there either. */
+  elevation?: number;
   [key: string]: unknown;
 }
 
-const supportedAmenities = new Set<Amenity>(["BISTRO", "WIFI", "WHEELCHAIR"]);
-
-function mapAvailability(a?: string): DepartureAvailability {
-  if (!a || a === "available" || a === "AVAILABLE") return "available";
-  if (a === "soldOut" || a === "SOLD_OUT") return "soldOut";
-  if (a === "CANCELLED" || a === "POTENTIAL_CANCEL") return "cancelled";
-  return "unavailable";
-}
-
-function headingLevel(el?: string): 2 | 3 | 4 {
-  const n = Number(el?.replace(/^h/, ""));
-  return n === 3 || n === 4 ? n : 2;
+/** KB's flat translation object, mapped onto the new component's texts. */
+function toText(tr: Record<string, string> | undefined): Partial<DepartureCardText> | undefined {
+  if (!tr) return undefined;
+  const pick = <K extends string>(keys: readonly K[]) =>
+    Object.fromEntries(keys.filter((k) => tr[k] !== undefined).map((k) => [k, tr[k]])) as Record<K, string>;
+  const out: Partial<DepartureCardText> = {};
+  const status = pick(unavailableReasons);
+  const comfort = pick(comfortCategories);
+  if (Object.keys(status).length) out.status = status;
+  if (Object.keys(comfort).length) out.comfort = comfort;
+  for (const [from, to] of [
+    ["travelTime", "travelTime"],
+    ["hours", "hours"],
+    ["minutes", "minutes"],
+    ["separator", "separator"],
+    ["classAvailable", "classAvailable"],
+    ["srLoadingPrice", "loadingPrice"],
+    ["srLoadingComfortAvailability", "loadingComfort"],
+    ["srTravelDetails", "travelDetails"],
+  ] as const) {
+    if (tr[from] !== undefined) out[to] = tr[from];
+  }
+  return out;
 }
 
 export function DepartureCard(props: DepartureCardProps) {
@@ -89,59 +122,86 @@ export function DepartureCard(props: DepartureCardProps) {
     disabled,
     onClick,
     showPrice,
+    showPoints,
     price,
-    hidePricePrefix,
+    points,
     pricePrefix,
+    hidePricePrefix,
+    priceType,
+    currency,
+    disabledPrice,
+    isLoadingPrice,
+    priceText,
+    priceTextType = "secondary",
+    secondaryPriceText,
+    secondaryPriceTextType,
+    hasComfortAvailabilities,
+    comfortAvailabilities,
     captionText,
     captionIcon,
     captionSrText,
+    captionColor,
     badgeLabel,
-    timeLabelTypographyElement,
+    badgeColor,
+    durationLink,
+    size,
+    borderRadiusOverride,
+    adjustLeft,
+    translation,
     timeZone,
     lang,
     className,
     id,
     customAttribute,
+    limitClickArea,
     limitedClickAreaSlot,
     children,
+    CardActionAreaProps,
+    ClickableCardProps,
   } = props;
-  warnUnsupported("DepartureCard", props, ["durationLink", "translation", "isLoadingPrice", "priceText", "secondaryPriceText", "comfortAvailabilities"]);
-  if (props.showPoints) warnOnce("DepartureCard", "showPoints is not supported in the pilot.");
 
-  const amenities = transportInformations
-    .map((t) => t.code as Amenity)
-    .filter((code) => {
-      if (supportedAmenities.has(code)) return true;
-      warnOnce("DepartureCard", `amenity ${code} has no icon in the pilot and is left out.`);
-      return false;
-    });
-
+  const { component: _component, ...link } = durationLink ?? {};
   return (
     <NewDepartureCard
+      {...(ClickableCardProps as Record<`data-${string}`, string>)}
       {...legacyMarker}
       {...customAttr(customAttribute)}
       id={id}
-      className={cx(className)}
+      className={className}
       departureDate={departureDate}
       arrivalDate={arrivalDate}
       duration={duration}
-      transportations={transportations.map((t) => ({ producer: t.producer, productName: t.productName, id: t.id }))}
-      amenities={amenities}
+      transportations={transportations}
+      amenities={transportInformations.map((t) => t.code as Amenity)}
       price={showPrice ? price : undefined}
-      priceFrom={!hidePricePrefix && (pricePrefix ?? "from") === "from"}
-      availability={mapAvailability(availability)}
+      points={showPoints ? points : undefined}
+      pricePrefix={hidePricePrefix ? false : (pricePrefix ?? "from")}
+      priceType={priceType}
+      currency={currency}
+      priceDisabled={disabledPrice}
+      priceLoading={isLoadingPrice}
+      priceTexts={[
+        ...(priceText ? [{ text: priceText, type: priceTextType }] : []),
+        ...(secondaryPriceText ? [{ text: secondaryPriceText, type: secondaryPriceTextType }] : []),
+      ]}
+      comfort={hasComfortAvailabilities ? comfortAvailabilities : undefined}
+      availability={availability}
       selected={active}
       disabled={disabled}
       onClick={onClick}
-      caption={captionText ? { text: captionText, icon: captionIcon, srText: captionSrText } : undefined}
-      badge={badgeLabel ? <span className="sj-legacy-badge">{badgeLabel}</span> : undefined}
-      headingLevel={headingLevel(timeLabelTypographyElement)}
+      caption={captionText ? { text: captionText, icon: captionIcon, srText: captionSrText, highlighted: captionColor === "highlighted" } : undefined}
+      badge={badgeLabel && badgeColor ? { label: badgeLabel, color: badgeColor } : undefined}
+      durationLink={durationLink ? (link as NonNullable<Parameters<typeof NewDepartureCard>[0]["durationLink"]>) : undefined}
+      size={size}
+      radius={borderRadiusOverride}
+      alignVehiclesWithText={adjustLeft}
       lang={resolveLang(lang)}
+      text={toText(translation)}
       timeZone={timeZone}
+      buttonProps={CardActionAreaProps}
+      footer={limitClickArea ? limitedClickAreaSlot : children}
     >
-      {/* KB renders limitedClickAreaSlot outside the click area, so it can hold its own links and buttons. */}
-      {limitedClickAreaSlot}
-      {children}
+      {limitClickArea ? children : null}
     </NewDepartureCard>
   );
 }

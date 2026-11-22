@@ -25,6 +25,7 @@ const preview: Preview = {
       const theme = useMemo(() => createTheme(generateThemeOptions(scheme, false)), [scheme]);
       useEffect(() => {
         document.documentElement.style.colorScheme = scheme;
+        document.documentElement.dataset.colorScheme = scheme;
       }, [scheme]);
       return (
         <ThemeProvider theme={theme}>

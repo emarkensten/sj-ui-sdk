@@ -1,25 +1,64 @@
-import type { ReactNode } from "react";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { useId } from "react";
 import { Button as UiButton } from "@ui-sdk/react/button";
-import { Bistro, LongDistanceTrain, MoonSmall, Wheelchair, WiFi } from "../../icons";
+import {
+  BicycleSmall,
+  BistroSmall,
+  CateringSmall,
+  ChevronRight,
+  HeartOutlinedSmall,
+  KomreaSmall,
+  KomrepSmall,
+  MoonSmall,
+  PetsOffSmall,
+  PetsSmall,
+  PowerOutletSmall,
+  WheelchairSmall,
+  WiFiPlusSmall,
+  WiFiSmall,
+} from "../../icons";
 import { cx } from "../../lib/cx";
-import { durationBetween, formatDuration, formatPrice, formatTime, type Duration } from "../../lib/format";
+import { durationBetween, formatDuration, formatTime, spokenDuration, type Duration } from "../../lib/format";
 import { joinList, resolveLang, t, type Lang } from "../../lib/i18n";
+import { departureCardText, type ComfortCategory, type DepartureCardText, type UnavailableReason } from "./text";
+import { vehicleColumns, vehicleFor, type TransportMethod } from "./vehicles";
 
-export type Amenity = "BISTRO" | "WIFI" | "WHEELCHAIR";
+export type { ComfortCategory, DepartureCardText, UnavailableReason } from "./text";
+
+export type Amenity =
+  | "BIKE"
+  | "BISTRO"
+  | "CATERING"
+  | "FAMILY"
+  | "NOPETS"
+  | "PETS"
+  | "POWEROUTLET"
+  | "WHEELCHAIR"
+  | "WIFI"
+  | "WIFIPLUS"
+  | "KOMREP"
+  | "KOMREA";
 
 export interface Transportation {
+  /** Stable key for the list. */
+  id: string;
   /** "SJ" */
   producer?: string;
   /** "Snabbtåg", not "SJ Snabbtåg": the producer is written before it. */
-  productName: string;
-  /** Stable key for the list. */
-  id: string;
-  /** Train number, like "421". Shown after the product name when given. */
-  trainNumber?: string;
+  productName?: string;
+  /** Written after the name on journeys with one or two legs, like "SJ Snabbtåg, Vy Nattåg". */
+  serviceBrandName?: string;
+  /** "Tåg", "Buss": with one leg, written as "tåg 421" after the name, using `id` as the number. */
+  transportMethodDescription?: string;
+  /** Train model, like "X2000", "SJ3000" or "REGINA". Picks the illustration. Unknown: a generic train. */
+  concept?: string;
+  /** "BUS", "FERRY" and "TAXI" get their own illustration. Default: a train. */
+  transportMethod?: TransportMethod | (string & {});
 }
 
-export type DepartureAvailability = "available" | "soldOut" | "unavailable" | "cancelled";
+export type DepartureAvailability = "available" | "AVAILABLE" | UnavailableReason;
+export type BadgeColor = "green" | "lightGreen" | "blue" | "yellow" | "orange" | "red" | "grey" | "placeholder" | "lightGrey" | "outlined";
+export type PriceTextType = "standard" | "secondary" | "lowPrice";
 
 export interface DepartureCardProps {
   departureDate: Date | string;
@@ -28,22 +67,60 @@ export interface DepartureCardProps {
   duration?: Duration;
   /** One per leg. Changes are the number of legs minus one. */
   transportations: Transportation[];
+  /** Symbols for the train, shown after the picture when the journey has a single leg. */
   amenities?: Amenity[];
-  /** Price in whole kronor. Left out: no price is shown or read out. */
+
+  /** Price in kronor (or euro with `currency="EUR"`). Left out: no price. */
   price?: number;
-  /** "Fr." before the price. Default true. */
-  priceFrom?: boolean;
+  /** SJ Prio points, shown above the price. */
+  points?: number;
+  /** "Fr.", "Lägg till fr." or "Lägg till" before the price. `false` hides it. Default "from". */
+  pricePrefix?: "from" | "addFrom" | "add" | false;
+  /** "lowPrice" colours the price orange. */
+  priceType?: "standard" | "lowPrice";
+  currency?: "SEK" | "EUR";
+  /** Greys out the price. */
+  priceDisabled?: boolean;
+  /** Shows a placeholder while the price loads. */
+  priceLoading?: boolean;
+  /** Up to two lines under the price, like "Endast 2 platser kvar". */
+  priceTexts?: { text: string; type?: PriceTextType }[];
+  /** Travel classes. Only the available ones are listed; sold-out ones are struck through. */
+  comfort?: { category: ComfortCategory; isAvailable: boolean; soldOut?: boolean }[];
+
+  /** "available", or one of SJ's reasons a departure can't be chosen, like "soldOut" or "CANCELLED". */
   availability?: DepartureAvailability;
-  /** The departure the traveller has chosen. Sets `aria-pressed`. */
+  /** The departure the traveller has chosen. Sets `aria-pressed` and a green frame. */
   selected?: boolean;
-  /** Stops clicks too (unlike KB's DepartureCard, whose `disabled` let clicks through). */
+  /**
+   * Greys out and stops clicks (unlike KB's DepartureCard, whose `disabled` let clicks through).
+   * An unavailable departure stays clickable, as in KB, so the page can explain why.
+   */
   disabled?: boolean;
   onClick?: () => void;
-  caption?: { text: string; icon?: "moon"; srText?: string };
-  badge?: ReactNode;
-  /** Heading level of the times. SJ lists use h2. */
-  headingLevel?: 2 | 3 | 4;
+  /** Extra attributes for the card's button, like `aria-describedby`. */
+  buttonProps?: Record<string, unknown>;
+
+  caption?: { text: string; icon?: "moon"; srText?: string; highlighted?: boolean };
+  badge?: { label: string; color?: BadgeColor };
+  /**
+   * Makes "Restid …, 0 byten" a link of its own, for example to the stops. The card then has two
+   * targets side by side, never one inside the other.
+   */
+  durationLink?: AnchorHTMLAttributes<HTMLAnchorElement> & { onClick?: () => void };
+
+  /**
+   * Layout. Left out: follows the window like KB, "small" under 360 px, "medium" under 600 px,
+   * "large" from 600 px.
+   */
+  size?: "small" | "medium" | "large";
+  /** Corner radius token. Default "default" (16 px). */
+  radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "default";
+  /** Pull the vehicle pictures to the card's edge (default) or keep them in line with the text. */
+  alignVehiclesWithText?: boolean;
   lang?: Lang;
+  /** Replaces any of the built-in texts. */
+  text?: Partial<DepartureCardText>;
   timeZone?: string;
   className?: string;
   /** Non-interactive content inside the click area, under the card's own content. */
@@ -55,13 +132,48 @@ export interface DepartureCardProps {
   [dataAttr: `data-${string}`]: string | undefined;
 }
 
-const amenityIcons: Record<Amenity, typeof Bistro> = { BISTRO: Bistro, WIFI: WiFi, WHEELCHAIR: Wheelchair };
+const amenityIcons: Record<Amenity, typeof BistroSmall> = {
+  BIKE: BicycleSmall,
+  BISTRO: BistroSmall,
+  CATERING: CateringSmall,
+  FAMILY: HeartOutlinedSmall,
+  NOPETS: PetsOffSmall,
+  PETS: PetsSmall,
+  POWEROUTLET: PowerOutletSmall,
+  WHEELCHAIR: WheelchairSmall,
+  WIFI: WiFiSmall,
+  WIFIPLUS: WiFiPlusSmall,
+  KOMREP: KomrepSmall,
+  KOMREA: KomreaSmall,
+};
+
+const prefixes = {
+  sv: { from: ["Fr.", "från"], addFrom: ["Lägg till fr.", "lägg till från"], add: ["Lägg till", "lägg till"] },
+  en: { from: ["Fr.", "from"], addFrom: ["Add fr.", "add from"], add: ["Add", "add"] },
+} as const;
+const currencies = {
+  SEK: { sv: [":-", "svenska kronor"], en: ["SEK", "Swedish kronor"] },
+  EUR: { sv: ["€", "euro"], en: ["EUR", "euros"] },
+} as const;
+
+// KB treats these as unavailable (dimmed, with a heading). The lower-case tooFewPrioPoints is not in KB's list.
+const isUnavailable = (a: DepartureAvailability) => a !== "available" && a !== "AVAILABLE" && a !== "tooFewPrioPoints";
+const showsPrice = (a: DepartureAvailability) => !isUnavailable(a) || a === "TOO_FEW_PRIO_POINTS";
+
+function amount(n: number, lang: Lang, currency: "SEK" | "EUR") {
+  const decimals = currency === "EUR" && n % 1 !== 0 ? 2 : undefined;
+  return n.toLocaleString(lang === "en" ? "en-US" : "sv-SE", { minimumFractionDigits: decimals });
+}
 
 const toDate = (d: Date | string) => (d instanceof Date ? d : new Date(d));
 
 /**
- * One departure to choose in a list. The whole card is a button (ui-sdk Button, so agents see it),
- * with the times as its heading and everything else read out as a description.
+ * One departure to choose in a list, laid out like SJ's DepartureCard in all its variants.
+ *
+ * The whole card is one button (a ui-sdk Button, so agents see it). Its name is one spoken
+ * sentence, like KB's: "Avgår 08:10, ankommer 11:05, pris från 495 svenska kronor, restiden är
+ * 2 timmar och 55 minuter, 0 byten, körs med SJ Snabbtåg, symboler: bistro och wifi". The visible
+ * text is hidden from screen readers so nothing is read twice.
  */
 export function DepartureCard({
   departureDate,
@@ -70,15 +182,27 @@ export function DepartureCard({
   transportations,
   amenities = [],
   price,
-  priceFrom = true,
+  points,
+  pricePrefix = "from",
+  priceType = "standard",
+  currency = "SEK",
+  priceDisabled,
+  priceLoading,
+  priceTexts = [],
+  comfort,
   availability = "available",
   selected,
   disabled,
   onClick,
+  buttonProps,
   caption,
   badge,
-  headingLevel = 2,
+  durationLink,
+  size,
+  radius,
+  alignVehiclesWithText,
   lang: langProp,
+  text: textProp,
   timeZone = "Europe/Stockholm",
   className,
   footer,
@@ -86,70 +210,231 @@ export function DepartureCard({
   ...rest
 }: DepartureCardProps) {
   const lang = resolveLang(langProp);
-  const text = t(lang);
-  const id = useId();
+  const uid = useId();
+  const base = t(lang);
+  const copy = { ...departureCardText[lang], ...textProp };
   const dep = toDate(departureDate);
   const arr = toDate(arrivalDate);
   const depTime = formatTime(dep, timeZone);
   const arrTime = formatTime(arr, timeZone);
-  const durationText = formatDuration(duration ?? durationBetween(dep, arr), lang);
+  const dur = duration ?? durationBetween(dep, arr);
   const changes = Math.max(0, transportations.length - 1);
-  const unavailable = availability !== "available";
-  const blocked = disabled || unavailable;
-  const H = `h${headingLevel}` as const;
-  const statusText = availability === "soldOut" ? text.soldOut : availability === "cancelled" ? text.cancelled : availability === "unavailable" ? text.unavailable : null;
-  const trains = transportations.map((tr) => `${[tr.producer, tr.productName].filter(Boolean).join(" ")}${tr.trainNumber ? `, ${text.train} ${tr.trainNumber}` : ""}`);
-  const amenityText = amenities.length ? `${text.amenities}: ${joinList(amenities.map((a) => text.amenity[a] ?? a.toLowerCase()), lang)}` : null;
+  const unavailable = isUnavailable(availability);
+  const blocked = Boolean(disabled);
+  const statusText = unavailable ? copy.status[availability as UnavailableReason] : null;
+  const showPriceObject = showsPrice(availability) && (price !== undefined || points !== undefined);
+  const hasPrice = showPriceObject && price !== undefined;
+  const hasPoints = showPriceObject && points !== undefined;
+  const singleLeg = transportations.length === 1;
+  const shownAmenities = singleLeg ? amenities.filter((a) => amenityIcons[a]) : [];
+  const availableComfort = comfort?.filter((c) => c.isAvailable) ?? [];
+  const [prefixText, prefixSpoken] = pricePrefix ? prefixes[lang][pricePrefix] : ["", ""];
+  const [suffixText, suffixSpoken] = currencies[currency][lang];
+  const priceText = hasPrice ? `${amount(price, lang, currency)}${suffixText === ":-" ? suffixText : ` ${suffixText}`}` : "";
+  const pointsText = hasPoints ? `${amount(points, "sv", "SEK")} p` : "";
+  const durationText = `${copy.travelTime} ${formatDuration(dur, lang, copy).replace(/(\d) /g, "$1 ")}, ${changes} ${base.changesWord(changes)}`;
+
+  const spokenPrice = () => {
+    if (priceLoading) return copy.loadingPrice;
+    const parts = [hasPrice ? `${amount(price, lang, currency)} ${suffixSpoken}` : null, hasPoints ? `${amount(points, "sv", "SEK")} ${base.pointsSr}` : null].filter(Boolean);
+    const intro = pricePrefix === "add" || pricePrefix === "addFrom" ? "" : `${base.priceSr} `;
+    return `${intro}${prefixSpoken ? `${prefixSpoken} ` : ""}${parts.join(" + ")}`;
+  };
+  const spoken = [
+    caption ? (caption.srText ?? caption.text) : null,
+    `${base.departs} ${depTime}`,
+    `${base.arrives} ${arrTime}`,
+    statusText ?? (showPriceObject || priceLoading ? spokenPrice() : null),
+    ...priceTexts.map((p) => p.text),
+    spokenDuration(dur, lang),
+    base.changes(changes),
+    priceLoading && availableComfort.length ? copy.loadingComfort : null,
+    !priceLoading && availableComfort.some((c) => !c.soldOut)
+      ? `${copy.classAvailable}${availableComfort.filter((c) => !c.soldOut).map((c) => copy.comfort[c.category]).join(", ")}`
+      : null,
+    `${base.operatedBy} ${transportations.map((tr) => [tr.producer, tr.productName].filter(Boolean).join(" ")).join(`, ${base.then} `)}`,
+    shownAmenities.length ? `${base.symbols} ${joinList(shownAmenities.map((a) => base.amenity[a]), lang)}` : null,
+    badge?.label,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  // KB moves the transport details and the classes between sizes; each placement is rendered and CSS shows one.
+  const details = (at: "small" | "medium" | "large") => (
+    <span aria-hidden="true" className="sj-departure-card__details sj-departure-card__dim" data-at={at}>
+      <span
+        className="sj-departure-card__vehicles"
+        data-align-text={alignVehiclesWithText || undefined}
+        style={{ gridTemplateColumns: `16px ${vehicleColumns(transportations)}` }}
+      >
+        {transportations.map((tr, i) => (
+          <img key={tr.id} className="sj-departure-card__vehicle" src={vehicleFor(tr)} alt="" draggable={false} data-first={i === 0 || undefined} />
+        ))}
+        {shownAmenities.length > 0 && (
+          <span className="sj-departure-card__amenities">
+            {shownAmenities.map((a) => {
+              const Icon = amenityIcons[a];
+              return <Icon key={a} size="1.25rem" />;
+            })}
+          </span>
+        )}
+      </span>
+      <span className="sj-departure-card__trains">{transportLabel(transportations)}</span>
+    </span>
+  );
+
+  const comfortLine = (at: "large" | "compact") =>
+    availableComfort.length > 0 && (
+    <span aria-hidden="true" className="sj-departure-card__comfort" data-at={at}>
+      {priceLoading ? (
+        <span className="sj-skeleton" style={{ width: "10rem" }} />
+      ) : (
+        <span className="sj-departure-card__comfort-text">
+          {availableComfort.map((c, i) => (
+            <span key={c.category}>
+              <span data-sold-out={c.soldOut || undefined}>{copy.comfort[c.category]}</span>
+              {i < availableComfort.length - 1 ? ", " : ""}
+            </span>
+          ))}
+        </span>
+      )}
+    </span>
+  );
+
+  const visual = (
+    <span className="sj-departure-card__visual" aria-hidden={durationLink ? undefined : true}>
+      {caption && (
+        <span aria-hidden="true" className="sj-departure-card__caption sj-departure-card__dim" data-highlighted={caption.highlighted || undefined}>
+          {caption.icon === "moon" && <MoonSmall size="1.25rem" />}
+          <span>{caption.text}</span>
+        </span>
+      )}
+      <span className="sj-departure-card__row">
+        <span className="sj-departure-card__main">
+          <span aria-hidden="true" className="sj-departure-card__time sj-departure-card__dim">
+            <span>{`${depTime}${copy.separator}`}</span>
+            <span>{arrTime}</span>
+          </span>
+          <span aria-hidden={durationLink ? undefined : true} className="sj-departure-card__duration sj-departure-card__dim">
+            {durationLink ? <DurationLink {...durationLink} describedBy={`${uid}-desc`} label={durationText} /> : durationText}
+          </span>
+          {badge && (
+            <span aria-hidden="true" className="sj-departure-card__badge sj-departure-card__dim" data-color={badge.color ?? "green"}>
+              <span className="sj-departure-card__badge-dot" />
+              <span className="sj-departure-card__badge-label">{badge.label}</span>
+            </span>
+          )}
+          {details("large")}
+        </span>
+        {details("small")}
+        <span aria-hidden="true" className="sj-departure-card__divider" />
+        <span aria-hidden="true" className="sj-departure-card__side">
+          <span className="sj-departure-card__prices">
+            {priceLoading ? (
+              <span className="sj-departure-card__price-loading">
+                <span className="sj-skeleton" style={{ width: "5.9375rem" }} />
+              </span>
+            ) : (
+              showPriceObject && (
+                <span className="sj-departure-card__price sj-departure-card__dim" data-type={priceType} data-disabled={(!disabled && priceDisabled) || undefined}>
+                  {hasPoints && (
+                    <span>
+                      {prefixText && <span className="sj-departure-card__price-prefix">{`${prefixText} `}</span>}
+                      <span className="sj-departure-card__price-value">{pointsText}</span>
+                    </span>
+                  )}
+                  {hasPrice && (
+                    <span data-secondary={hasPoints || undefined}>
+                      {prefixText && !hasPoints && <span className="sj-departure-card__price-prefix">{`${prefixText} `}</span>}
+                      {hasPoints && <span>+ </span>}
+                      <span className="sj-departure-card__price-value">{priceText}</span>
+                    </span>
+                  )}
+                </span>
+              )
+            )}
+            {!priceLoading &&
+              showPriceObject &&
+              priceTexts.slice(0, 2).map((p) => (
+                <span key={p.text} className="sj-departure-card__price-text" data-type={p.type ?? "secondary"} data-disabled={unavailable || undefined}>
+                  {p.text}
+                </span>
+              ))}
+            {statusText && <span className="sj-departure-card__status">{statusText}</span>}
+          </span>
+          <ChevronRight className="sj-departure-card__chevron sj-departure-card__dim" />
+          {comfortLine("large")}
+        </span>
+      </span>
+      {details("medium")}
+      {comfortLine("compact")}
+    </span>
+  );
+  // Inside the click area and read out after the card, like KB's children.
+  const footerEl = footer && <span className="sj-departure-card__footer sj-departure-card__dim">{footer}</span>;
 
   return (
-    <div {...rest} className={cx("sj-departure-card", className)} data-selected={selected || undefined} data-availability={availability}>
+    <div
+      {...rest}
+      className={cx("sj-departure-card", className)}
+      data-selected={selected || undefined}
+      data-unavailable={unavailable || undefined}
+      data-size={size}
+      data-radius={radius}
+      data-duration-link={durationLink ? "" : undefined}
+    >
       <UiButton
+        {...buttonProps}
         className="sj-departure-card__button"
         aria-pressed={selected ?? false}
-        aria-labelledby={`${id}-time`}
-        aria-describedby={`${id}-desc`}
         disabled={blocked}
         focusableWhenDisabled
+        // Safari skips buttons on Tab unless they have a tabindex. KB's buttons have one too.
+        tabIndex={0}
         onClick={blocked ? undefined : onClick}
       >
-        <span className="sj-departure-card__top">
-          <H id={`${id}-time`} className="sj-departure-card__time">
-            <span aria-hidden="true">{`${depTime}–${arrTime}`}</span>
-            <span className="sj-visually-hidden">{`${text.departs} ${depTime}, ${text.arrives} ${arrTime}`}</span>
-          </H>
-          {price !== undefined && !unavailable && (
-            <span className="sj-departure-card__price">
-              {priceFrom && <span className="sj-departure-card__price-prefix">{text.from} </span>}
-              <span className="sj-departure-card__price-value">{formatPrice(price, lang)}</span>
-            </span>
-          )}
-          {statusText && <span className="sj-departure-card__status">{statusText}</span>}
-        </span>
-        <span id={`${id}-desc`} className="sj-departure-card__desc">
-          <span className="sj-departure-card__duration">
-            {`${text.travelTime} ${durationText}, ${text.changes(changes)}`}
-          </span>
-          <span className="sj-departure-card__meta">
-            <LongDistanceTrain className="sj-departure-card__train" />
-            {amenities.map((a) => {
-              const Icon = amenityIcons[a];
-              return Icon ? <Icon key={a} className="sj-departure-card__amenity" /> : null;
-            })}
-            {amenityText && <span className="sj-visually-hidden">{amenityText}.</span>}
-          </span>
-          <span className="sj-departure-card__trains">{trains.join(" · ")}</span>
-          {caption && (
-            <span className="sj-departure-card__caption">
-              {caption.icon === "moon" && <MoonSmall size="1.25rem" />}
-              <span aria-hidden={caption.srText ? true : undefined}>{caption.text}</span>
-              {caption.srText && <span className="sj-visually-hidden">{caption.srText}</span>}
-            </span>
-          )}
-          {badge && <span className="sj-departure-card__badge">{badge}</span>}
-          {footer}
-        </span>
+        <span className="sj-visually-hidden">{spoken}</span>
+        {!durationLink && visual}
+        {!durationLink && footerEl}
       </UiButton>
+      {durationLink && visual}
+      {durationLink && footerEl}
+      {durationLink && (
+        <span id={`${uid}-desc`} className="sj-visually-hidden">{`${spoken}, ${copy.travelDetails}`}</span>
+      )}
       {children}
     </div>
+  );
+}
+
+/** "SJ Snabbtåg", "SJ Snabbtåg, tåg 421", or the legs joined with " + ", like KB's TransportDetails. */
+function transportLabel(legs: Transportation[]) {
+  const name = (tr: Transportation) => [tr.producer, tr.productName].filter(Boolean).join(" ");
+  if (legs.length > 2) return legs.map(name).join(" + ");
+  if (legs.length === 2) return legs.map((tr) => [name(tr), tr.serviceBrandName].filter(Boolean).join(", ")).join(" + ");
+  const [tr] = legs;
+  if (!tr) return "";
+  return [name(tr), tr.serviceBrandName, tr.transportMethodDescription ? `${tr.transportMethodDescription.toLowerCase()} ${tr.id}` : null].filter(Boolean).join(", ");
+}
+
+function DurationLink({
+  describedBy,
+  label,
+  onClick,
+  href,
+  ...rest
+}: AnchorHTMLAttributes<HTMLAnchorElement> & { onClick?: () => void; describedBy: string; label: string }) {
+  // The description repeats the card, so the link is told apart when several cards are listed.
+  if (href) {
+    return (
+      <a {...rest} href={href} onClick={onClick} className="sj-departure-card__link" aria-describedby={describedBy}>
+        {label}
+      </a>
+    );
+  }
+  return (
+    <button type="button" tabIndex={0} onClick={onClick} className="sj-departure-card__link" aria-describedby={describedBy}>
+      {label}
+    </button>
   );
 }

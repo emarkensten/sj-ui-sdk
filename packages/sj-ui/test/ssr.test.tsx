@@ -35,7 +35,7 @@ describe("server rendering", () => {
     expect(html).toContain('data-slot="date-picker-input"');
     expect(html).toContain('role="switch"');
     expect(html).toContain("Tisdag 24 november");
-    expect(html).toContain("07:10–10:05");
+    expect(html).toContain("07:10–</span><span>10:05");
     expect(html).toContain("495:-");
     expect(html).not.toMatch(/<style/); // no CSS-in-JS
   });

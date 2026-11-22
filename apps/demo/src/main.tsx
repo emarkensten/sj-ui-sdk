@@ -9,6 +9,7 @@ function App() {
   const [scheme, setScheme] = useState<"light" | "dark">(() => (new URLSearchParams(location.search).get("dark") ? "dark" : "light"));
   useEffect(() => {
     document.documentElement.style.colorScheme = scheme;
+    document.documentElement.dataset.colorScheme = scheme;
   }, [scheme]);
   return (
     <main className="page">

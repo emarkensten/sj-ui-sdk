@@ -1,4 +1,4 @@
-import { locales, resolveLang, t } from "./i18n";
+import { joinList, locales, resolveLang, t } from "./i18n";
 
 const STOCKHOLM = "Europe/Stockholm";
 
@@ -34,9 +34,9 @@ export function formatPrice(price: number, lang?: string) {
 
 export type Duration = { days?: string | number; hours?: string | number; minutes?: string | number };
 
-export function formatDuration(duration: Duration | undefined, lang?: string) {
+export function formatDuration(duration: Duration | undefined, lang?: string, units?: { hours?: string; minutes?: string }) {
   if (!duration) return "";
-  const d = t(lang);
+  const d = { ...t(lang), ...units };
   const parts: string[] = [];
   if (Number(duration.days)) parts.push(`${duration.days} ${d.days}`);
   if (Number(duration.hours)) parts.push(`${duration.hours} ${d.hours}`);
@@ -52,4 +52,20 @@ export function durationBetween(from: Date, to: Date): Duration {
 
 export function isoToday(timeZone = STOCKHOLM) {
   return new Intl.DateTimeFormat("sv-SE", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+}
+
+/** "restiden är 2 timmar och 55 minuter", as KB reads it out. */
+export function spokenDuration(duration: Duration | undefined, lang?: string) {
+  if (!duration) return "";
+  const d = t(lang);
+  const parts: string[] = [];
+  const add = (v: string | number | undefined, [one, many]: string[]) => {
+    const n = Number(v);
+    if (n) parts.push(`${n} ${n === 1 ? one : many}`);
+  };
+  add(duration.days, d.spokenUnits.day);
+  add(duration.hours, d.spokenUnits.hour);
+  add(duration.minutes, d.spokenUnits.minute);
+  if (!parts.length) return "";
+  return `${d.travelTimeSr} ${joinList(parts, lang)}`;
 }
