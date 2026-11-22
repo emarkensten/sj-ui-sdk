@@ -27,8 +27,8 @@ export function loadKnown(path) {
 }
 
 /** A difference is known when every changed line matches a known-difference pattern for the component. */
-function known(d, component, knownList) {
-  const rules = knownList.filter((k) => k.component === component || k.component === "*");
+function known(d, component, knownList, story) {
+  const rules = knownList.filter((k) => (k.component === component || k.component === "*") && (!k.story || k.story === story));
   const ch = d.filter((x) => x.op !== " ");
   if (!ch.length || !rules.length) return null;
   const hit = rules.find((r) => ch.every((x) => r.re.test(x.line)));
@@ -43,7 +43,7 @@ export function compareFast(r, knownList) {
 
   const restDiff = diff(lines(kb.rest), lines(sj.rest));
   if (changed(restDiff)) {
-    const k = known(restDiff, component, knownList);
+    const k = known(restDiff, component, knownList, r.story);
     findings.push({ kind: "tree", title: "Tillgänglighetsträdet i vila", diff: restDiff, severity: k ? "known" : "orange", reason: k });
   }
 
@@ -64,7 +64,7 @@ export function compareFast(r, knownList) {
       const focusSame = a.focus === b.focus;
       const treeDiff = diff(lines(a.tree), lines(b.tree));
       if (focusSame && !changed(treeDiff)) continue;
-      const k = focusSame ? known(treeDiff, component, knownList) : known(diff([a.focus], [b.focus]), component, knownList);
+      const k = focusSame ? known(treeDiff, component, knownList, r.story) : known(diff([a.focus], [b.focus]), component, knownList, r.story);
       const keysSoFar = kbSteps.slice(0, i + 1).map((s) => keyName(s.key)).join(" → ");
       findings.push({
         kind: "flow",
@@ -96,7 +96,7 @@ export function compareVo(entries) {
   });
 }
 
-const role = (focusLine) => (focusLine.match(/^- (\w+)/) ?? [])[1] ?? focusLine;
+const role = (focusLine) => (focusLine.match(/^- '?(\w+)/) ?? [])[1] ?? focusLine;
 const keyName = (k) => (k === " " ? "Space" : k);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const label = { green: "Lika", orange: "Skiljer", red: "Skiljer, troligen fel i sj-ui", known: "Känd skillnad", info: "Info" };

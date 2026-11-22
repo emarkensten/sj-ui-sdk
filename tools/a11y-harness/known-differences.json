@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "component": "Select",
+    "story": "Oppna Stang",
+    "match": ".*",
+    "reason": "Egen onOpen/onClose: KB:s lista öppnas aldrig, sj-ui öppnar den (docs/avsiktliga-skillnader.md)."
+  }
+]
