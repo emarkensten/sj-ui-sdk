@@ -83,7 +83,7 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
   } = props;
   warnUnsupported("DatePicker", props as unknown as Record<string, unknown>, ["displayFormat", "hasWeekNumbers", "hasActionButtons", "secondaryView", "customTranslation"]);
   const resolved = useLegacySx(sx);
-  const [errorText, setErrorText] = useState<string | null>(null);
+  const [invalid, setInvalid] = useState(false);
 
   const today = isoToday(timeZone);
   const min = [minDate || undefined, disablePast ? today : undefined].filter(Boolean).sort().pop();
@@ -102,13 +102,13 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
         onValueChange={(next) => {
           const v = next ?? "";
           if (min && v && v < min) {
-            setErrorText(errorHelperText ?? null);
+            setInvalid(true);
             onError?.("minDateError", v);
           } else if (max && v && v > max) {
-            setErrorText(errorHelperText ?? null);
+            setInvalid(true);
             onError?.("maxDateError", v);
           } else {
-            setErrorText(null);
+            setInvalid(false);
           }
           onChange?.(syntheticChange({ value: v, name: name ?? id }));
           if (v) onAccept?.(v);
@@ -118,8 +118,8 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
         lang={resolveLang(lang)}
         timeZone={timeZone}
         helperText={helperText}
-        error={errorText !== null}
-        errorText={errorText ?? undefined}
+        error={invalid}
+        errorText={invalid ? errorHelperText : undefined}
         required={required}
         disabled={disabled}
         name={name ?? id}

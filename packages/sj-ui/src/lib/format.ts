@@ -3,6 +3,8 @@ import { locales, resolveLang, t } from "./i18n";
 const STOCKHOLM = "Europe/Stockholm";
 
 export function formatTime(date: Date, timeZone = STOCKHOLM) {
+  // Intl throws a RangeError on an invalid date, which would take the whole page down.
+  if (Number.isNaN(date.getTime())) return "";
   return new Intl.DateTimeFormat("sv-SE", { hour: "2-digit", minute: "2-digit", timeZone }).format(date);
 }
 

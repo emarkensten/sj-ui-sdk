@@ -18,9 +18,7 @@
     outline: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-border-divider);
   }
 
-  .sj-legacy-flow-link { display: inline-block; text-decoration: none; color: inherit; }
-  .sj-legacy-flow-link--full { display: block; width: 100%; }
-  .sj-legacy-flow-link > .sj-button { pointer-events: none; }
+  a.sj-button { text-decoration: none; }
 
   /* isLoading skeletons */
   .sj-legacy-skeleton {

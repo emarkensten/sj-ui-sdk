@@ -22,7 +22,7 @@ export function Switch({ label, description, labelPlacement = "start", className
     <UiSwitch
       {...rest}
       className={cx("sj-switch", !label && className)}
-      aria-describedby={description ? descId : (rest["aria-describedby"] as string | undefined)}
+      aria-describedby={cx(rest["aria-describedby"] as string | undefined, description ? descId : undefined)}
     >
       <SwitchThumb className="sj-switch__thumb" />
     </UiSwitch>

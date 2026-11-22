@@ -138,8 +138,9 @@ export function DepartureCard(props: DepartureCardProps) {
       headingLevel={headingLevel(timeLabelTypographyElement)}
       lang={resolveLang(lang)}
       timeZone={timeZone}
-      footer={limitedClickAreaSlot}
     >
+      {/* KB renders limitedClickAreaSlot outside the click area, so it can hold its own links and buttons. */}
+      {limitedClickAreaSlot}
       {children}
     </NewDepartureCard>
   );

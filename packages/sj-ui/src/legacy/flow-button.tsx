@@ -93,7 +93,10 @@ export const FlowButton = forwardRef(function FlowButton(props: FlowButtonProps,
     return <span className="sj-legacy-skeleton" data-size={sizes[size]} data-full-width={fullWidth || undefined} aria-hidden="true" {...customAttr(customAttribute, "Skeleton")} />;
   }
 
-  const button = (
+  // KB renders a link when href is set. ui-sdk's Button renders the link itself through `render`,
+  // so there is one focusable element with link semantics, not a button nested in an anchor.
+  const Link = LinkComponent ?? "a";
+  return (
     <Button
       {...rest}
       {...legacyMarker}
@@ -113,21 +116,11 @@ export const FlowButton = forwardRef(function FlowButton(props: FlowButtonProps,
       className={cx(resolved.className, className)}
       style={{ ...resolved.style, ...style }}
       data-legacy-color={mapped.legacy}
+      render={href ? <Link href={href} /> : undefined}
     >
       {children}
     </Button>
   );
-
-  // KB renders a link when href is set. Keep that: the link gets the button's look.
-  if (href && !disabled) {
-    const Link = LinkComponent ?? "a";
-    return (
-      <Link href={href} className={cx("sj-legacy-flow-link", fullWidth && "sj-legacy-flow-link--full")}>
-        {button}
-      </Link>
-    );
-  }
-  return button;
 });
 
 export default FlowButton;

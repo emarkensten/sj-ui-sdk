@@ -3,6 +3,7 @@
  * Drop-in for `@sj-ab/component-library.ui.form-control-label`.
  */
 import type { CSSProperties, ReactElement, ReactNode } from "react";
+import { cloneElement } from "react";
 import { cx } from "../lib/cx";
 import { customAttr, legacyMarker, useLegacySx, type CustomAttribute, type LegacySx } from "./shared";
 
@@ -39,7 +40,7 @@ export function FormControlLabel({ control, label, labelPlacement = "end", negat
       data-negative-left={left || undefined}
       data-disabled={disabled || undefined}
     >
-      {control}
+      {disabled && (control.props as { disabled?: boolean }).disabled === undefined ? cloneElement(control as ReactElement<{ disabled?: boolean }>, { disabled: true }) : control}
       <span className="sj-legacy-fcl__label">{label}</span>
     </label>
   );

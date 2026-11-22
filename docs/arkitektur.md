@@ -32,6 +32,7 @@ CSS-lagerordning: `@layer sj-tokens, sj-base, ui-sdk, sj-components;`. Tokens li
 | `lang`, `translation` | `lang` stöds, `customTranslation` varnar |
 | `sx` | Spacing (`m`, `p`, `gap`, ×8 px) och layout stöds. Resten varnar, eller går till RFC:ns `useSjSx` via `LegacySxProvider resolver={useSjSx}` |
 | `DepartureCard disabled` | Stoppar klicket (KB:s bugg: når inte kortets knapp) |
+| `id` på Select och DatePicker | Saknas än: hamnar på en omslutande `div`, inte på kontrollen. `label htmlFor` och `#id` i tester hittar alltså inte fältet |
 
 ## Token-drift
 

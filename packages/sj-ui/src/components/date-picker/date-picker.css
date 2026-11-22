@@ -40,8 +40,8 @@
     font: var(--sjse-typography-body);
     color: var(--sjse-color-text-primary);
   }
-  .sj-field:focus-within .sj-date-picker__display { display: none; }
-  .sj-field:focus-within .sj-date-picker__input::placeholder { color: var(--sjse-color-text-placeholder); }
+  .sj-field:has(.sj-date-picker__input:focus) .sj-date-picker__display { display: none; }
+  .sj-date-picker__input:focus::placeholder { color: var(--sjse-color-text-placeholder); }
 
   .sj-date-picker__trigger,
   .sj-calendar__nav {

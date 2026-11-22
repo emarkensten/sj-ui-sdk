@@ -47,7 +47,10 @@ export function createSjAgent({ confirm, allow }: SjAgentOptions = {}): SjAgent 
  * without it. The browser's agent is not one SJ controls, so every step that changes
  * something must pass `confirm`, not only the marked ones. Returns an unregister function.
  */
-export function registerSjBrowserTools(agent: SjAgent, confirm: (step: AgentAction) => boolean | Promise<boolean>): () => void {
+export function registerSjBrowserTools(
+  agent: SjAgent,
+  confirm: (step: AgentAction, signal: AbortSignal) => boolean | Promise<boolean>,
+): () => void {
   if (typeof document === "undefined") return () => {};
-  return registerTools(agent, { allow: (step) => confirm(step) });
+  return registerTools(agent, { allow: (step, { signal }) => confirm(step, signal) });
 }

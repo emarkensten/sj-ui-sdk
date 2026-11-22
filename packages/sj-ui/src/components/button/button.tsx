@@ -8,7 +8,7 @@ export type ButtonColor = "lov" | "himmel2" | "himmel" | "gras" | "varning" | "r
 export type ButtonSize = "small" | "medium" | "large" | "extraLarge";
 type HtmlButtonType = "button" | "submit" | "reset";
 
-export interface ButtonProps extends Omit<ComponentProps<typeof UiButton>, "type" | "color" | "className" | "children" | "render"> {
+export interface ButtonProps extends Omit<ComponentProps<typeof UiButton>, "type" | "color" | "className" | "children"> {
   className?: string;
   children?: ReactNode;
   /**

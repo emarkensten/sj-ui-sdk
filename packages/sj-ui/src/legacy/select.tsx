@@ -89,6 +89,8 @@ export const Select = forwardRef(function Select(props: SelectProps, _ref: Ref<H
   let placeholder: string | undefined;
   const options: SelectOption[] = [];
   const childByValue = new Map<string, ReactNode>();
+  // MUI hands back the MenuItem's own value, so a number stays a number.
+  const originalByValue = new Map<string, string | number>();
   Children.forEach(children, (child) => {
     if (!isValidElement<MenuItemProps>(child)) return;
     if (child.type !== MenuItem) warnOnce("Select", "Only MenuItem children become options.");
@@ -100,6 +102,7 @@ export const Select = forwardRef(function Select(props: SelectProps, _ref: Ref<H
     }
     options.push({ value: v, label, disabled: child.props.disabled });
     childByValue.set(v, child);
+    if (child.props.value != null) originalByValue.set(v, child.props.value);
   });
 
   if (isLoading) {
@@ -115,7 +118,7 @@ export const Select = forwardRef(function Select(props: SelectProps, _ref: Ref<H
         options={options}
         value={controlled ? (value === "" || value == null ? null : String(value)) : undefined}
         defaultValue={defaultValue == null ? null : String(defaultValue)}
-        onValueChange={(next) => onChange?.(syntheticChange({ value: next ?? "", name }), next ? childByValue.get(next) : undefined)}
+        onValueChange={(next) => onChange?.(syntheticChange({ value: next ? (originalByValue.get(next) ?? next) : "", name }), next ? childByValue.get(next) : undefined)}
         placeholder={placeholder}
         helperText={helperText}
         error={error}
