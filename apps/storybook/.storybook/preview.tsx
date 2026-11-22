@@ -6,6 +6,12 @@ import "@sj-ui-sdk/sj-ui/styles.css";
 import "@sj-ui-sdk/sj-ui/legacy.css";
 import "./preview.css";
 
+// Accessibility harness (tools/a11y-harness): ?a11y-side=kb|sj shows only one side of a comparison,
+// so a screen reader hears one implementation at a time. Has no effect without the parameter.
+const a11ySide = new URLSearchParams(window.location.search).get("a11y-side");
+if (a11ySide === "kb" || a11ySide === "sj") document.documentElement.dataset.a11ySide = a11ySide;
+let a11yFocused = false;
+
 const preview: Preview = {
   globalTypes: {
     scheme: {
@@ -27,6 +33,18 @@ const preview: Preview = {
         document.documentElement.style.colorScheme = scheme;
         document.documentElement.dataset.colorScheme = scheme;
       }, [scheme]);
+      useEffect(() => {
+        // In the harness, start with focus just before the component: the first Tab lands on it,
+        // and VoiceOver starts reading there instead of in Safari's toolbar.
+        if (!a11ySide || a11yFocused) return;
+        a11yFocused = true;
+        const root = document.getElementById("storybook-root");
+        if (root) {
+          root.tabIndex = -1;
+          root.style.outline = "none";
+          root.focus({ preventScroll: true });
+        }
+      }, []);
       return (
         <ThemeProvider theme={theme}>
           <CssBaseline />

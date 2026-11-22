@@ -15,3 +15,10 @@ body { background: var(--sjse-color-background-primary); color: var(--sjse-color
 .overview thead th { font: var(--sjse-typography-footnote-emphasized); color: var(--sjse-color-text-secondary); }
 .overview li { margin-bottom: 8px; max-width: 75ch; }
 .overview code { font-size: 0.9em; }
+
+/* Accessibility harness: one side at a time, without the column labels and logs. */
+[data-a11y-side="kb"] .compare__col:nth-child(2),
+[data-a11y-side="sj"] .compare__col:nth-child(1),
+[data-a11y-side] .compare__tag,
+[data-a11y-side] .compare__log,
+[data-a11y-side] .compare__meta { display: none; }
