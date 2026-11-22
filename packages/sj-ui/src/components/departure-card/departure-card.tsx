@@ -281,7 +281,7 @@ export function DepartureCard({
     `${symbolsSpoken ? `, ${symbolsSpoken}` : ""}${badge?.label ? `, ${badge.label}` : ""}`,
   ]
     .join(" ")
-    .replace(/\s+/g, " ")
+    .replace(/ +/g, " ")
     .trim();
 
   // KB moves the transport details and the classes between sizes; each placement is rendered and CSS shows one.

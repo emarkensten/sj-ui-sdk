@@ -27,7 +27,7 @@ En grov uppskattning: utan UI SDK hade Select och DatePicker krävt 3 000–4 00
 
 ## Vad det inte sparade
 
-- **Pixelparitet.** All CSS är skriven för hand mot KB:s tema. Det var den största delen av arbetet: att mäta, jämföra och rätta tills 306 av 308 jämförelser var identiska.
+- **Pixelparitet.** All CSS är skriven för hand mot KB:s tema. Det var den största delen av arbetet: att mäta, jämföra och rätta tills 612 av 616 jämförelser var identiska.
 - **KB:s egenheter.** Maskad inmatning i datumfältet, att Enter och blur godkänner, mobilens skrivskyddade fält med bottenark, veckonummer, MUI:s regler för att jämföra värden. Allt det skrevs i legacy-lagret.
 - **Legacy-props.** 295 KB-props, översatta till UI SDK:s API.
 - **Enkla komponenter.** FlowButton, Switch och DepartureCard hade gått lika fort utan UI SDK.
@@ -38,6 +38,23 @@ En grov uppskattning: utan UI SDK hade Select och DatePicker krävt 3 000–4 00
 - Kräver React 19.
 - Select läser "text" i stället för "markerad" i VoiceOver när listan öppnas. Felsökning pågår. Vi vet inte än om felet sitter i UI SDK eller i sj-ui.
 - Fem av KB:s 192 komponenter. Nästlade komponenter (journey-summary, route-description) är inte provade.
+
+## Vad som tog tid, och hur nästa komponenter går snabbare
+
+Piloten tog ungefär sex timmar för fem komponenter. Cirka en fjärdedel gick till att bygga. Resten gick till att hitta skillnader mot KB, en i taget:
+
+- **Skillnader hittades sent och för hand.** En skärmdump eller ett klick i taget, och KB:s egenheter (maskad inmatning, tidszonen i skärmläsartexten, tågnumret från `id`) upptäcktes först när något skilde sig.
+- **VoiceOver i serie.** Varje fråga krävde en körning på Macen, med väntan mellan.
+- **Mätverktygen byggdes under arbetets gång** i stället för före.
+
+Processen för nästa komponenter:
+
+1. **Generera testerna innan bygget.** Ett skript läser KB-komponentens `.d.ts` och stories och skapar jämförelsestories, prop-täckningen och pixeltester för varje variant i ljust och mörkt, desktop och mobil. Skärmläsartexten jämförs från tillgänglighetsträdet, ord för ord. Komponenten är klar när alla är gröna eller listade som avsiktliga skillnader.
+2. **Läs KB:s källa först.** Skärmläsartexter, översättningar och hjälpfunktioner i KB:s `dist/` kopieras rakt av, så att egenheterna kommer med från början.
+3. **Testsviten kör allt på några minuter** (`tools/a11y-harness`): tillgänglighetsträd i WebKit, tangentbordsflöden, axe och VoiceOver i Safari, med en rapport KB mot sj-ui.
+4. **En komponent per tråd, parallellt.** Med testerna som facit kan flera komponenter byggas samtidigt utan att vänta på varandra.
+
+Med det på plats bör en enkel komponent ta under en timme och en komplex (Select, DatePicker) några timmar, mest maskintid.
 
 ## Bedömning
 

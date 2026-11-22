@@ -112,3 +112,20 @@ export function LegacySxProvider({ resolver, children }: { resolver: SxResolver 
 export function useLegacySx(sx: LegacySx) {
   return useContext(SxContext)(sx);
 }
+
+/**
+ * MUI's modal hides everything outside the open layer from assistive tech (aria-hidden on the
+ * siblings of every ancestor). KB's Select and DatePicker menus are such modals, and VoiceOver
+ * reads the focused row differently when the rest of the page is still there. Returns the undo.
+ */
+export function hideOthers(keep: Element): () => void {
+  const hidden: Element[] = [];
+  for (let node: Element | null = keep; node && node !== document.body; node = node.parentElement) {
+    for (const sibling of Array.from(node.parentElement?.children ?? [])) {
+      if (sibling === node || sibling.hasAttribute("aria-hidden") || /^(SCRIPT|STYLE|TEMPLATE)$/.test(sibling.tagName)) continue;
+      sibling.setAttribute("aria-hidden", "true");
+      hidden.push(sibling);
+    }
+  }
+  return () => hidden.forEach((el) => el.removeAttribute("aria-hidden"));
+}

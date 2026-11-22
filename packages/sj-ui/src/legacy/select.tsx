@@ -16,7 +16,7 @@ import { Cancel, ChevronDown } from "../icons";
 import { cx } from "../lib/cx";
 import { kbMobileQuery, useMedia } from "../lib/use-media";
 import { MenuItem, MenuItemLayout, type MenuItemProps } from "./menu-item";
-import { customAttr, kbRadii, legacyMarker, useLegacySx, type CustomAttribute, type KbRadius, type LegacySx, assignRef, type Density } from "./shared";
+import { customAttr, kbRadii, legacyMarker, useLegacySx, type CustomAttribute, type KbRadius, type LegacySx, assignRef, hideOthers, type Density } from "./shared";
 
 /** MUI's SelectChangeEvent: what onChange reads is `event.target.value` and `event.target.name`. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MUI types the value as any
@@ -186,6 +186,17 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
     return () => cancelAnimationFrame(frame);
   }, [isOpenNow, mobile]);
 
+  // While open, only the menu is reachable for assistive tech, as in KB (see hideOthers).
+  useEffect(() => {
+    if (!isOpenNow) return;
+    let undo = () => {};
+    const frame = requestAnimationFrame(() => {
+      const menu = rootRef.current?.querySelector(".sj-legacy-menu");
+      if (menu) undo = hideOthers(menu);
+    });
+    return () => { cancelAnimationFrame(frame); undo(); };
+  }, [isOpenNow]);
+
   const setRefs = (el: HTMLDivElement | null) => {
     rootRef.current = el;
     assignRef(ref, el);
@@ -305,6 +316,7 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
             style={{ ...menu?.style, ...menu?.PaperProps?.style, ...menu?.slotProps?.paper?.style }}
             data-density={menuDensity}
             data-auto-width={autoWidth || undefined}
+            role={mobile ? undefined : "presentation"}
           >
             <div className="sj-legacy-menu__header">
               <h1 className="sj-legacy-menu__title">{labelText}</h1>
@@ -315,7 +327,7 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
                 <Cancel />
               </button>
             </div>
-            <SelectList className="sj-legacy-menu__list" aria-label={labelText} tabIndex={-1}>
+            <SelectList className="sj-legacy-menu__list" tabIndex={-1} aria-label={mobile ? labelText : ""}>
               {nodes.map((n, i) => {
                 if ("other" in n) return <div key={`x${i}`} role="presentation">{n.other}</div>;
                 const o = n.option;

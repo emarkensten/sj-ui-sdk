@@ -11,7 +11,7 @@ Gå vidare med UI SDK för de komplexa komponenterna (Select, DatePicker, Dialog
 | | KB | sj-ui |
 |---|---|---|
 | Paketstorlek, alla fem, gzip | 303 kB | 178 kB (41 % mindre) |
-| Pixelidentiska jämförelser, ljust och mörkt, desktop och mobil | | PARITETTOTAL |
+| Pixelidentiska jämförelser, ljust och mörkt, desktop och mobil | | 612 av 616 |
 | KB-props som fungerar oförändrade | | 295 av 295 |
 
 Kvar: Select läser "text" i stället för "markerad" i VoiceOver när listan öppnas, och nästlade komponenter är inte provade. Allt uppmätt står i [docs/matdata.md](docs/matdata.md), vad UI SDK gav i [docs/ui-sdk-rapport.md](docs/ui-sdk-rapport.md) och avsiktliga skillnader mot KB i [docs/avsiktliga-skillnader.md](docs/avsiktliga-skillnader.md).

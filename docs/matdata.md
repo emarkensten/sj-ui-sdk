@@ -9,7 +9,7 @@ Underlag för beslutet om UI SDK. Alla siffror gäller samma fem komponenter (Fl
 | Paketstorlek, alla fem, gzip | 303 kB JS | 166 kB JS + 12 kB CSS | 41 % mindre. Utan tågbilder: KB 194 kB, sj-ui 104 kB |
 | Prop-täckning | | 295 av 295 KB-props | Alla KB:s egna och MUI:s props finns, plus HTML-attributen |
 | Pixelparitet, 1000 px | | 306 av 308 identiska | Ljust och mörkt, 154 varianter. De 2 avvikande är ett KB-fel som rättats med flit |
-| Pixelparitet, 375 px | | PARITET375 | Mobil, ljust och mörkt |
+| Pixelparitet, 375 px | | 306 av 308 identiska | Mobil, ljust och mörkt. Samma 2 avvikelser som på desktop |
 | Renderingstid, produktion | 100 % | 52–88 % | sj-ui är snabbare i alla fem fallen |
 | axe | | Inga nya fel | sj-ui har samma kontrastfel som KB, inga fler |
 | SSR och hydrering | | Fungerar | Utan hydreringsvarningar, i testsviten |
@@ -55,7 +55,7 @@ Varje story under *Jämförelse/* i Storybook visar KB och sj-ui sida vid sida m
 | Bredd | Identiska | Avvikande |
 |---|---|---|
 | 1000 px | 306 av 308 | 2: Select *Tom med platshållare*, ljust och mörkt (0,8 %) |
-| 375 px | PARITET375 | PARITET375AVV |
+| 375 px | 306 av 308 | 2: samma Select-variant (1,0 %) |
 
 Avvikelsen i Select är ett KB-fel: med `displayEmpty` och tomt värde lägger KB etiketten ovanpå platshållaren, så två texter syns på varandra. sj-ui lyfter etiketten. Se [avsiktliga-skillnader.md](avsiktliga-skillnader.md).
 
@@ -89,6 +89,7 @@ Molnmaskinen körde andra tester samtidigt, så de absoluta tiderna är högre �
 **VoiceOver i Safari** (Mac, november 2026):
 
 - DatePicker: läser likadant som KB, fältet, kalendern och valet.
+- DepartureCard: kortets text för skärmläsare är KB:s ord för ord, med tågnummer och kommatecken. 46 av 49 varianter är identiska, de 3 andra är rättade fel i KB (se avsiktliga-skillnader.md). Jämfört i tillgänglighetsträdet, inte med VoiceOver.
 - Select: när listan öppnas säger VoiceOver "2 resenärer, text, 2 av 4" i sj-ui och "2 resenärer, markerad, 2 av 4" i KB. Tillgänglighetsträdet är detsamma. Felsökning pågår med en automatiserad VoiceOver-svit.
 
 FlowButton, Switch och DepartureCard är inte provade med VoiceOver än. Det gör den automatiserade sviten.
