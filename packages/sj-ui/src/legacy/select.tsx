@@ -315,7 +315,7 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
                 <Cancel />
               </button>
             </div>
-            <SelectList className="sj-legacy-menu__list" aria-label={labelText}>
+            <SelectList className="sj-legacy-menu__list" aria-label={labelText} tabIndex={-1}>
               {nodes.map((n, i) => {
                 if ("other" in n) return <div key={`x${i}`} role="presentation">{n.other}</div>;
                 const o = n.option;
