@@ -55,7 +55,8 @@ export const menuItemRoles: Record<MenuItemVariant, string> = {
 
 /** KB's row layout for a variant: text, and the icon that shows the state. */
 export function MenuItemLayout({ variant = "standard", selected, children, indicator }: { variant?: MenuItemVariant; selected?: boolean; children?: ReactNode; indicator?: ReactNode }) {
-  const text = <span className="sj-legacy-menu-item__text">{children}</span>;
+  // A div, as MUI's ListItemText: VoiceOver in Safari read a span here as "text" instead of the option's state.
+  const text = <div className="sj-legacy-menu-item__text">{children}</div>;
   switch (variant) {
     case "radio":
     case "checkbox": {
