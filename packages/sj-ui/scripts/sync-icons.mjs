@@ -27,7 +27,10 @@ for (const name of names) {
   const paths = [...src.matchAll(/React\.createElement\("path", \{([^}]*)\}\)/g)].map(([, body]) => {
     const d = attr(body, "d");
     const rule = attr(body, "fillRule");
-    return `<path fill="currentColor"${rule ? ` fill-rule="${rule}" clip-rule="${rule}"` : ""} d="${d}"/>`;
+    // Two-tone icons (checked radio and checkbox) keep their own fills: the white mark and the green background.
+    const own = attr(body, "fill");
+    const fill = own && own !== "none" ? own : "currentColor";
+    return `<path fill="${fill}"${rule ? ` fill-rule="${rule}" clip-rule="${rule}"` : ""} d="${d}"/>`;
   });
   if (!paths.length) throw new Error(`Hittade inga paths i ${name}`);
   out += `export const ${name} = svg(${JSON.stringify(paths.join(""))}, ${JSON.stringify(viewBox)});\n`;

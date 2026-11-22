@@ -19,6 +19,10 @@ export interface OutlinedFieldProps {
   end?: ReactNode;
   className?: string;
   name?: string;
+  /** Id for the label element, for controls that point at it with aria-labelledby. */
+  labelId?: string;
+  /** Extra attributes on the root, like data-* for styling. */
+  rootProps?: Record<string, string | undefined>;
   /** The control: a SelectTrigger, an Input, a DatePickerInput. */
   children: ReactNode;
 }
@@ -42,11 +46,14 @@ export function OutlinedField({
   end,
   className,
   name,
+  labelId,
+  rootProps,
   children,
 }: OutlinedFieldProps) {
   const message = error ? (errorText ?? helperText) : helperText;
   return (
     <Field
+      {...rootProps}
       className={cx("sj-field", className)}
       invalid={error || undefined}
       disabled={disabled}
@@ -58,7 +65,7 @@ export function OutlinedField({
       data-required={required || undefined}
     >
       {label && (
-        <FieldLabel className="sj-field__label">
+        <FieldLabel className="sj-field__label" id={labelId}>
           {label}
         </FieldLabel>
       )}

@@ -128,3 +128,193 @@
     justify-self: start;
   }
 }
+
+/*
+ * Select and MenuItem: KB's MUI Select, its menu (ui.menu-item, Select's MenuProps) and the
+ * bottom sheet KB opens below 600 px (ui.menu, variant bottomsheet).
+ */
+@layer sj-components {
+  .sj-legacy-select { display: inline-flex; flex-direction: column; min-width: 0; vertical-align: top; }
+  .sj-legacy-select[data-full-width] { display: flex; width: 100%; }
+
+  .sj-field[data-legacy-select] {
+    --sj-legacy-select-pad: var(--sjse-spacing-default);
+    &[data-density="compact"] { --sj-legacy-select-pad: var(--sjse-spacing-x1_5); }
+    &[data-density="dense"] { --sj-legacy-select-pad: var(--sjse-spacing-x1); }
+    &[data-density="tight"] { --sj-legacy-select-pad: var(--sjse-spacing-x0_5); }
+    & .sj-field__box { min-height: calc(2 * var(--sj-legacy-select-pad) + 1.5rem); }
+    & .sj-select__trigger { min-height: calc(2 * var(--sj-legacy-select-pad) + 1.5rem); }
+    &[data-has-start] .sj-select__trigger { padding-left: 0; }
+    /* KB's focus ring sits on MUI's select display: the box minus its 16 px side padding (none on
+       the start side after an icon). The field also turns focus-blue, even with an error. */
+    & .sj-select__trigger { position: relative; }
+    & .sj-select__trigger:focus-visible { outline: none !important; box-shadow: none !important; }
+    & .sj-select__trigger:focus-visible::after {
+      content: "";
+      position: absolute;
+      inset: 0 var(--sjse-spacing-default) 0 var(--sjse-spacing-default);
+      outline: var(--sjse-focus-outline-width) solid var(--sjse-color-border-focused);
+      outline-offset: var(--sjse-focus-outline-offset);
+      box-shadow: 0 0 0 calc(var(--sjse-focus-outline-width) * 3) var(--sjse-color-background-primary);
+      border-radius: var(--sjse-border-radius-sm);
+      pointer-events: none;
+    }
+    &[data-has-start] .sj-select__trigger:focus-visible::after { inset-inline-start: 0; }
+    &[data-rounded] .sj-select__trigger:focus-visible::after { inset-inline: var(--sjse-spacing-x3); }
+    &[data-invalid]:is(:focus-within, :has([data-open])) .sj-field__outline { border-color: var(--sjse-color-border-focused) !important; }
+    &[data-invalid]:is(:focus-within, :has([data-open])) .sj-field__label { color: var(--sjse-color-border-focused); }
+    &:not([data-filled], :focus-within, :has([data-open])) .sj-field__label { transform: translate(0.875rem, var(--sj-legacy-select-pad)) scale(1); }
+    &[data-radius="lg"] .sj-field__box { border-radius: var(--sjse-border-radius-lg); }
+    &[data-radius="md"] .sj-field__box { border-radius: var(--sjse-border-radius-md); }
+    &[data-radius="sm"] .sj-field__box { border-radius: var(--sjse-border-radius-sm); }
+    &[data-radius="capsule"] .sj-field__box { border-radius: var(--sjse-border-radius-capsule); }
+    /* Rounded: a capsule with the label hidden and more room on the sides. */
+    &[data-rounded] {
+      & .sj-field__box { border-radius: var(--sjse-border-radius-capsule); }
+      & .sj-field__label { visibility: hidden; }
+      & .sj-field__outline { top: 0; }
+      & .sj-field__outline legend { display: none; }
+      & .sj-select__trigger { padding-inline: var(--sjse-spacing-x3); }
+    }
+  }
+  .sj-legacy-native-select { appearance: none; background: none; border: 0; }
+
+  /* The menu under the field. */
+  .sj-legacy-menu {
+    box-sizing: border-box;
+    min-width: var(--anchor-width, 12rem);
+    max-height: min(calc(100dvh - 2rem), var(--available-height, 100dvh));
+    overflow: auto;
+    margin: 0;
+    padding: 0;
+    border: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-border-border);
+    border-radius: var(--sjse-border-radius-xl);
+    background: var(--sjse-color-background-primary-level-1);
+    color: var(--sjse-color-text-primary);
+    box-shadow: var(--sjse-shadow-default);
+    outline: none;
+    &[data-auto-width] { min-width: 0; }
+    &[data-presentation="popover"] .sj-legacy-menu__header { display: none; }
+  }
+  .sj-legacy-menu__list { margin: 0; padding: 0; outline: none; }
+
+  /* A row, in a menu or on its own. */
+  .sj-legacy-menu-item {
+    --sj-legacy-menu-pad: var(--sjse-spacing-default);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    margin: 0;
+    padding: var(--sj-legacy-menu-pad) var(--sjse-spacing-default);
+    list-style: none;
+    cursor: pointer;
+    font: var(--sjse-typography-body);
+    color: var(--sjse-color-text-primary);
+    text-decoration: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    :is(.sj-legacy-menu[data-density="compact"]) & { --sj-legacy-menu-pad: var(--sjse-spacing-x1_5); }
+    :is(.sj-legacy-menu[data-density="dense"]) & { --sj-legacy-menu-pad: var(--sjse-spacing-x1); }
+    :is(.sj-legacy-menu[data-density="tight"]) & { --sj-legacy-menu-pad: var(--sjse-spacing-x0_5); }
+    @media (hover: hover) { &:hover:not([data-disabled]) { background-color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered)); } }
+    &:active:not([data-disabled]) { background-color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-pressed)); }
+    &:focus-visible, .sj-legacy-menu[data-modality="keyboard"] &[data-highlighted] {
+      outline: var(--sjse-focus-outline-width) solid var(--sjse-color-border-focused) !important;
+      outline-offset: calc(var(--sjse-focus-outline-width) * -2) !important;
+      box-shadow: 0 0 0 calc(var(--sjse-focus-outline-width) * 3) var(--sjse-color-background-primary) !important;
+      z-index: 1;
+    }
+    .sj-legacy-menu[data-presentation="popover"] &:first-child:is(:focus-visible, [data-highlighted]) { border-start-start-radius: var(--sjse-border-radius-xl); border-start-end-radius: var(--sjse-border-radius-xl); }
+    .sj-legacy-menu[data-presentation="popover"] &:last-child:is(:focus-visible, [data-highlighted]) { border-end-start-radius: var(--sjse-border-radius-xl); border-end-end-radius: var(--sjse-border-radius-xl); }
+    &[data-disabled] { opacity: var(--sjse-opacity-disabled); cursor: default; pointer-events: none; }
+    &[data-variant="separator"] { cursor: default; padding: var(--sjse-spacing-x3) var(--sjse-spacing-default) var(--sjse-spacing-x1); }
+  }
+  .sj-legacy-menu-item__text { flex: 1 1 auto; min-width: 0; }
+  .sj-legacy-menu-item__check { display: flex; flex: none; margin-left: 0.28125rem; margin-right: calc(-1 * var(--sjse-spacing-x1_5)); width: 2.25rem; }
+  .sj-legacy-menu-item__check svg { width: 1.5rem; height: 1.5rem; }
+  .sj-legacy-menu-item__state { display: flex; flex: none; padding-right: var(--sjse-spacing-x1_5); color: var(--sjse-color-fill-granit); }
+  .sj-legacy-menu-item__state[data-selected] { color: var(--sjse-color-fill-lov-1); }
+  .sj-legacy-menu-item input.sj-switch[data-in-menu] { margin: 0; pointer-events: none; }
+  .sj-legacy-menu-divider {
+    display: block;
+    height: 0;
+    margin: 0 0 0 var(--sjse-spacing-default);
+    width: calc(100% - 2 * var(--sjse-spacing-default));
+    border: 0;
+    border-bottom: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-border-divider);
+    list-style: none;
+  }
+
+  /* The bottom sheet below 600 px: title and close button, then the rows. */
+  .sj-legacy-menu[data-presentation="sheet"] {
+    width: 100%;
+    max-height: 80dvh;
+    border: 0;
+    border-radius: var(--sjse-border-radius-xl) var(--sjse-border-radius-xl) 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  /* KB's sheet: a 56 px app bar holds only the close button, and the title (an h1, title 1) sits
+     20 px from the top, over an inset divider. */
+  .sj-legacy-menu__header {
+    position: relative;
+    padding: 1.25rem var(--sjse-spacing-default) var(--sjse-spacing-default);
+  }
+  .sj-legacy-menu__header::after {
+    content: "";
+    position: absolute;
+    inset: auto var(--sjse-spacing-default) 0;
+    border-bottom: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-border-divider);
+  }
+  .sj-legacy-menu__title { margin: 0; padding-right: 3rem; font: var(--sjse-typography-title-1-emphasized); }
+  .sj-legacy-menu__close {
+    all: unset;
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: rgb(from var(--sjse-color-text-primary) r g b / 0.04);
+    cursor: pointer;
+    svg { width: 1.5rem; height: 1.5rem; }
+  }
+  /* MUI's backdrop behind the sheet. */
+  [data-slot="select-viewport"]:has(> .sj-legacy-menu[data-presentation="sheet"]) {
+    transition: background-color 225ms cubic-bezier(0.4, 0, 0.2, 1);
+    &:has(> [data-open]:not([data-ending-style])) { background-color: rgb(0 0 0 / 0.5); }
+  }
+
+  /* isLoading: KB's SelectSkeleton. */
+  .sj-legacy-select-skeleton {
+    display: inline-flex; flex-direction: column; gap: var(--sjse-spacing-default);
+    &[data-full-width] { display: flex; width: 100%; }
+  }
+  .sj-legacy-select-skeleton__label { display: block; width: 80px; height: 14px; margin-block: 6px 4px; border-radius: var(--sjse-border-radius-sm); background: light-dark(rgb(0 0 0 / 0.11), rgb(255 255 255 / 0.13)); animation: sj-legacy-pulse 2s ease-in-out 0.5s infinite; }
+  .sj-legacy-select-skeleton__box {
+    --sj-legacy-select-pad: var(--sjse-spacing-default);
+    box-sizing: border-box;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--sjse-spacing-default);
+    inline-size: 100%; max-inline-size: 343px; min-inline-size: min-content;
+    block-size: calc(2 * var(--sj-legacy-select-pad) + 1.5rem);
+    padding-inline: var(--sjse-spacing-default);
+    border: var(--sjse-border-width-sm, 1px) solid color-mix(in srgb, var(--sjse-color-border-input), transparent 42%);
+    border-radius: var(--sjse-border-radius-xl);
+    font: var(--sjse-typography-body);
+    &[data-density="compact"] { --sj-legacy-select-pad: var(--sjse-spacing-x1_5); }
+    &[data-density="dense"] { --sj-legacy-select-pad: var(--sjse-spacing-x1); }
+    &[data-density="tight"] { --sj-legacy-select-pad: var(--sjse-spacing-x0_5); }
+    &[data-radius="lg"] { border-radius: var(--sjse-border-radius-lg); }
+    &[data-radius="md"] { border-radius: var(--sjse-border-radius-md); }
+    &[data-radius="sm"] { border-radius: var(--sjse-border-radius-sm); }
+    &[data-rounded], &[data-radius="capsule"] { border-radius: var(--sjse-border-radius-capsule); }
+    &[data-rounded] { padding-inline: var(--sjse-spacing-x3); }
+    [data-full-width] > & { max-inline-size: 100%; }
+    & svg { min-inline-size: 1.5rem; color: var(--sjse-color-icon-secondary); opacity: var(--sjse-opacity-disabled); }
+  }
+  .sj-legacy-select-skeleton__bar { display: block; block-size: 12px; inline-size: 40%; min-inline-size: 16px; border-radius: var(--sjse-border-radius-sm); background: light-dark(rgb(0 0 0 / 0.11), rgb(255 255 255 / 0.13)); animation: sj-legacy-pulse 2s ease-in-out 0.5s infinite; }
+}

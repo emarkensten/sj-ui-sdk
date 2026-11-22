@@ -7,6 +7,10 @@
     --sjse-base-value: 16;
     --sjse-font-family: "sj_sans", system-ui, sans-serif;
   }
+  /* sj-global-styles switches to the dark shadow on .dark and the OS setting. KB's theme picks the
+     scheme itself, so we also follow data-color-scheme on <html>, as the components do. */
+  :root[data-color-scheme="dark"] { --sjse-shadow-default: var(--sjse-shadow-default-dark); }
+  :root[data-color-scheme="light"] { --sjse-shadow-default: 0 calc(2rem / var(--sjse-base-value)) calc(12rem / var(--sjse-base-value)) 0 rgb(0 0 0 / 10%); }
 
   .sj-visually-hidden {
     position: absolute !important;

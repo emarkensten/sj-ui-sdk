@@ -16,7 +16,7 @@
     color: var(--sjse-color-text-primary);
 
     .sj-field[data-has-start] & { padding-left: 0.5rem; }
-    &[data-disabled] { cursor: not-allowed; }
+    &[data-disabled] { cursor: not-allowed; color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-disabled)); }
     &[data-readonly] { cursor: default; }
   }
 
