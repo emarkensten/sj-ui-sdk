@@ -14,20 +14,20 @@
  *   the days. Week numbers, Avbryt/Klar buttons and `customTranslation` work as in KB.
  * Deliberate differences are listed in docs/avsiktliga-skillnader.md.
  */
-import type { ChangeEvent, CSSProperties, FocusEvent, KeyboardEvent, ReactNode, Ref, RefObject } from "react";
+import type { ChangeEvent, CSSProperties, FocusEvent, KeyboardEvent, ReactNode, Ref } from "react";
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Calendar as UiCalendar, CalendarDay, CalendarGrid, CalendarNext, CalendarPrevious, CalendarWeekday, CalendarWeekdays, CalendarWeeks } from "@ui-sdk/react/calendar";
+import { addDays, clampDate, daysInMonth, isISODate, weekday } from "@ui-sdk/core/date";
+import { createCalendarController, Calendar as UiCalendar, CalendarDay, CalendarGrid, CalendarNext, CalendarPrevious, CalendarWeekday, CalendarWeekdays, CalendarWeeks } from "@ui-sdk/react/calendar";
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from "@ui-sdk/react/popover";
 import { FieldControl } from "@ui-sdk/react/field";
 import { OutlinedField } from "../components/field/field";
 import { Calendar as CalendarIcon, ChevronDown, ChevronLeft, ChevronRight } from "../icons";
 import { cx } from "../lib/cx";
 import { isoToday } from "../lib/format";
+import { locales, resolveLang, type Lang } from "../lib/i18n";
 import { kbMobileQuery, useMedia } from "../lib/use-media";
 import { FlowButton } from "./flow-button";
-import { customAttr, legacyMarker, useLegacySx, type CustomAttribute, type KbRadius, kbRadii, type LegacySx } from "./shared";
-
-type Lang = "sv" | "en";
+import { assignRef, customAttr, legacyMarker, useLegacySx, type CustomAttribute, type Density, type KbRadius, kbRadii, type LegacySx } from "./shared";
 
 /* ---------------- KB's translations (translations.date-picker-translation) ---------------- */
 
@@ -51,7 +51,6 @@ export type DatePickerTranslation = typeof translations.sv;
 
 /** KB's weekday headers: three letters, the full name for screen readers. */
 const weekdayShort = { sv: ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"], en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] };
-const intlLocale = { sv: "sv-SE", en: "en-GB" };
 
 /* ---------------- Dates as ISO strings, computed in UTC so the browser's zone never shifts a day ---------------- */
 
@@ -60,20 +59,29 @@ const utc = (iso: string) => {
   const [y, m, d] = ymd(iso);
   return new Date(Date.UTC(y, m - 1, d));
 };
-const toIso = (date: Date) => date.toISOString().slice(0, 10);
-const daysIn = (y: number, m: number) => new Date(Date.UTC(y, m, 0)).getUTCDate();
 const pad = (n: number, len = 2) => String(n).padStart(len, "0");
-
 /** KB's isDateValidAndExisting: "yyyy-MM-dd" and a day that exists. */
-function isValidIso(value: string | undefined): value is string {
-  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const [y, m, d] = ymd(value);
-  return m >= 1 && m <= 12 && d >= 1 && d <= daysIn(y, m);
-}
+const isValidIso = (value: string | undefined): value is string => Boolean(value) && isISODate(value!);
+/** An ISO date from parts the caller knows are real. */
+const isoDate = (y: number, m: number, d: number) => `${y}-${pad(m)}-${pad(d)}`;
+/** The first and last day of a month. */
+const monthBounds = (y: number, m: number) => [isoDate(y, m, 1), isoDate(y, m, daysInMonth(y, m))] as const;
 
-const intl = (lang: Lang, options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(intlLocale[lang], { ...options, timeZone: "UTC" });
-const weekdayName = (iso: string, lang: Lang) => intl(lang, { weekday: "long" }).format(utc(iso));
-const monthName = (month: number, lang: Lang, width: "long" | "short" = "long") => intl(lang, { month: width }).format(new Date(Date.UTC(2000, month - 1, 1)));
+/** Month and weekday names, built once per language (formatters are slow to create). */
+const names = new Map<string, string[]>();
+function nameList(lang: Lang, kind: "month" | "weekday", width: "long" | "short") {
+  const key = `${lang}${kind}${width}`;
+  let list = names.get(key);
+  if (!list) {
+    const format = new Intl.DateTimeFormat(locales[lang], { [kind]: width, timeZone: "UTC" });
+    // 2001-01-07 was a Sunday, so weekday i (Sunday 0) is 7 + i January.
+    list = Array.from({ length: kind === "month" ? 12 : 7 }, (_, i) => format.format(kind === "month" ? Date.UTC(2000, i, 1) : Date.UTC(2001, 0, 7 + i)));
+    names.set(key, list);
+  }
+  return list;
+}
+const weekdayName = (iso: string, lang: Lang, width: "long" | "short" = "long") => nameList(lang, "weekday", width)[weekday(iso)];
+const monthName = (month: number, lang: Lang, width: "long" | "short" = "long") => nameList(lang, "month", width)[month - 1];
 
 /** date-fns' getWeek with the Swedish locale, which KB uses for both languages: the ISO week. */
 function isoWeek(iso: string) {
@@ -91,7 +99,7 @@ const longDate = (iso: string, lang: Lang) => {
 /** KB's createCustomDatePickerFormat: "Idag 22 november", "Tisdag 24 november", "Friday, 1 January 2027". */
 function friendlyDate(iso: string, lang: Lang, copy: DatePickerTranslation, today: string) {
   const [y, m, d] = ymd(iso);
-  const tomorrow = toIso(new Date(utc(today).getTime() + 86400000));
+  const tomorrow = addDays(today, 1);
   const prefix = iso === today ? `${copy.today}${copy.daySeparator} ` : iso === tomorrow ? `${copy.tomorrow}${copy.daySeparator} ` : `${weekdayName(iso, lang)}${lang === "en" ? ", " : " "}`;
   const year = y !== ymd(today)[0] ? ` ${y}` : "";
   return `${prefix}${d} ${monthName(m, lang)}${year}`.replace(/^\w|^[åäö]/, (c) => c.toUpperCase());
@@ -107,10 +115,7 @@ function formatPattern(iso: string, pattern: string, lang: Lang) {
       case "y": return n === 2 ? pad(y % 100) : pad(y, n);
       case "M": case "L": return n === 1 ? String(m) : n === 2 ? pad(m) : n === 3 ? monthName(m, lang, "short") : monthName(m, lang);
       case "d": return n === 1 ? String(d) : pad(d);
-      default: {
-        const name = weekdayName(iso, lang);
-        return n >= 4 ? name : intl(lang, { weekday: "short" }).format(utc(iso));
-      }
+      default: return weekdayName(iso, lang, n >= 4 ? "long" : "short");
     }
   });
 }
@@ -132,11 +137,7 @@ function maskedValue(input: string) {
 /** "2026-12-5" becomes "2026-12-05", as KB's addZeroToDay. */
 const withDayZero = (text: string) => (text.length === 9 ? `${text.slice(0, 8)}0${text.slice(8)}` : text);
 
-const clampIso = (iso: string, min: string, max: string) => (iso < min ? min : iso > max ? max : iso);
-
 /* ---------------- Props ---------------- */
-
-type Density = "comfortable" | "compact" | "dense" | "tight";
 
 /**
  * TextField and DateField props that KB's types inherit and KB's DatePicker never reads (it
@@ -206,7 +207,7 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
     isLoading, placeholder, density = "comfortable", borderRadiusOverride, journeyDirection, displayFormat, hasWeekNumbers,
     hasActionButtons, secondaryView = "month", customTranslation, customAttribute, customCalendarButtonRef, sx, className, style,
   } = props;
-  const lang: Lang = langProp === "en" ? "en" : "sv";
+  const lang = resolveLang(langProp);
   const copy: DatePickerTranslation = { ...translations[lang], ...customTranslation?.[lang] };
   const value = valueProp ?? "";
   const resolved = useLegacySx(sx);
@@ -224,7 +225,7 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
   // MUI's defaults are 1900-01-01 and 2099-12-31.
   const min = [minDate || "1900-01-01", disablePast ? today : ""].sort().pop()!;
   const max = [maxDate || "2099-12-31", disableFuture ? today : "9999"].sort()[0];
-  const selected = value.length >= 10 && isValidIso(value) ? value : null;
+  const selected = isValidIso(value) ? value : null;
   const shown = pending ?? selected;
 
   // KB moves focus to the calendar button whenever the calendar closes, also after a pick.
@@ -236,13 +237,12 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
 
   const setButtonRef = (el: HTMLButtonElement | null) => {
     buttonRef.current = el;
-    if (typeof customCalendarButtonRef === "function") customCalendarButtonRef(el);
-    else if (customCalendarButtonRef) (customCalendarButtonRef as RefObject<HTMLButtonElement | null>).current = el;
+    assignRef(customCalendarButtonRef, el);
   };
 
   const openChange = (next: boolean) => {
     if (next) {
-      setMonth(clampIso(selected ?? today, min, max).slice(0, 7));
+      setMonth(clampDate(selected ?? today, min, max).slice(0, 7));
       setView("day");
     }
     setPending(null);
@@ -250,17 +250,12 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
   };
 
   const accept = (date: string) => onAccept?.(date);
-
-  /** A day, month or year picked in the calendar. Days close it; with action buttons Klar does. */
-  const pick = (date: string, fromView: "day" | "month" | "year") => {
-    if (hasActionButtons) setPending(date);
-    else accept(date);
-    if (fromView === "day") {
-      if (!hasActionButtons) openChange(false);
-    } else {
-      setMonth(date.slice(0, 7));
-      setView("day");
-    }
+  /** A date picked in the calendar. With action buttons it waits for Klar. */
+  const pick = (date: string) => (hasActionButtons ? setPending(date) : accept(date));
+  /** A day closes the calendar, unless Klar does. */
+  const pickDay = (date: string) => {
+    pick(date);
+    if (!hasActionButtons) openChange(false);
   };
 
   if (isLoading) {
@@ -288,6 +283,7 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
 
   const fieldEvents = mobile
     ? {
+        render: (p: object) => <textarea {...p} rows={1} />,
         readOnly: true,
         onFocus: () => setMasked(false),
         onClick: () => openChange(true),
@@ -302,14 +298,14 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
         onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => {
           if (event.key === "Enter") confirmTyped(event.currentTarget.value);
         },
-        onChange: (event: ChangeEvent<HTMLInputElement>) => onChange?.(event),
+        onChange,
       };
 
-  const direction = journeyDirection === "outward" ? copy.outward : journeyDirection === "return" ? copy.return : "";
   const buttonLabel = selected
-    ? `${journeyDirection !== undefined ? `${direction}, ` : ""}${copy.calendarButtonAriaLabelPart1} ${longDate(selected, lang)}, ${copy.calendarButtonAriaLabelPart2}`
+    ? `${journeyDirection ? `${copy[journeyDirection]}, ` : ""}${copy.calendarButtonAriaLabelPart1} ${longDate(selected, lang)}, ${copy.calendarButtonAriaLabelPart2}`
     : copy.calendarButtonAriaLabelPart2;
   const labelText = label || copy.dateFieldLabel;
+  const presentation = mobile ? "sheet" : "popover";
 
   return (
     <div
@@ -318,7 +314,7 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
       data-full-width={fullWidth || mobile || undefined}
       style={{ ...resolved.style, ...style }}
     >
-      <Popover open={open} onOpenChange={openChange} presentation={mobile ? "sheet" : "popover"} modal={mobile ? true : false}>
+      <Popover open={open} onOpenChange={openChange} presentation={presentation} modal={mobile}>
         <OutlinedField
           label={labelText}
           externalLabel={hasExternalLabel}
@@ -338,6 +334,7 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
             <PopoverTrigger
               ref={setButtonRef}
               className="sj-legacy-date__button"
+              data-focus-ring=""
               aria-haspopup="dialog"
               aria-expanded={open}
               aria-label={buttonLabel}
@@ -357,15 +354,13 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
             autoComplete="off"
             aria-required={required}
             {...customAttr(customAttribute, "Input")}
-            {...(mobile
-              ? { render: (p: object) => <textarea {...p} rows={1} />, ...fieldEvents }
-              : fieldEvents)}
+            {...fieldEvents}
           />
         </OutlinedField>
         <PopoverContent
           className="sj-legacy-cal-popup"
           data-weeks={hasWeekNumbers || undefined}
-          data-presentation={mobile ? "sheet" : "popover"}
+          data-presentation={presentation}
           aria-label={mobile ? copy.dateFieldLabel : undefined}
           anchor={anchor ?? undefined}
           side="bottom"
@@ -373,12 +368,12 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
           sideOffset={0}
           collisionPadding={0}
           // Desktop: the selected day (or today), as MUI's autoFocus. KB's sheet focuses itself.
-          initialFocus={mobile ? "content" : () => document.querySelector<HTMLElement>(".sj-legacy-cal td[tabindex='0']")}
+          initialFocus={mobile ? "content" : TAB_STOP_DAY}
           finalFocus="none"
           style={props.zIndexCalendar ? { zIndex: props.zIndexCalendar } : undefined}
-          {...(customAttribute ? { [customAttribute.attribute]: String(customAttribute.value) } : {})}
+          {...customAttr(customAttribute)}
         >
-          {mobile && <PopoverClose className="sj-legacy-date__sheet-close">{copy.close}</PopoverClose>}
+          {mobile && <PopoverClose className="sj-visually-hidden">{copy.close}</PopoverClose>}
           <LegacyCalendar
             ref={ref}
             lang={lang}
@@ -396,6 +391,7 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
             disabled={disabled}
             hasWeekNumbers={hasWeekNumbers}
             onPick={pick}
+            onPickDay={pickDay}
           />
           {hasActionButtons && (
             <div className="sj-legacy-cal__actions">
@@ -436,8 +432,13 @@ interface LegacyCalendarProps {
   timeZone: string;
   disabled?: boolean;
   hasWeekNumbers?: boolean;
-  onPick: (date: string, view: "day" | "month" | "year") => void;
+  /** A month or year: the same day there, then the days again. */
+  onPick: (date: string) => void;
+  onPickDay: (date: string) => void;
 }
+
+/** The day that has the calendar's tab stop: the selected day, or today. */
+const TAB_STOP_DAY = "td[tabindex='0']";
 
 const LegacyCalendar = forwardRef(function LegacyCalendar(p: LegacyCalendarProps, ref: Ref<HTMLDivElement>) {
   const { lang, copy, value, month, view, secondaryView, min, max, today } = p;
@@ -446,43 +447,28 @@ const LegacyCalendar = forwardRef(function LegacyCalendar(p: LegacyCalendarProps
 
   /** MUI's month and year pick: the same day there, moved inside min and max. */
   const moveTo = (year: number, mon: number) => {
-    const day = Math.min(ymd(value ?? today)[2], daysIn(year, mon));
-    const first = `${year}-${pad(mon)}-01`;
-    const last = `${year}-${pad(mon)}-${pad(daysIn(year, mon))}`;
-    const date = `${year}-${pad(mon)}-${pad(day)}`;
-    return clampIso(date, first > min ? first : min, last < max ? last : max);
+    const [first, last] = monthBounds(year, mon);
+    const date = isoDate(year, mon, Math.min(ymd(value ?? today)[2], daysInMonth(year, mon)));
+    return clampDate(date, first > min ? first : min, last < max ? last : max);
+  };
+  const pickIn = (year: number, mon: number) => {
+    p.onPick(moveTo(year, mon));
+    p.onMonthChange(isoDate(year, mon, 1).slice(0, 7));
+    p.onViewChange("day");
   };
 
   // Back in the day view after a month or year pick, MUI focuses the day, as when the calendar opens.
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [controller] = useState(createCalendarController);
   const lastView = useRef(view);
   useEffect(() => {
     const back = view === "day" && lastView.current !== "day";
     lastView.current = view;
-    if (!back) return;
-    // ui-sdk gives a day its tab stop a few frames after the days render, so wait for it.
-    let frame = 0;
-    let tries = 0;
-    const tryFocus = () => {
-      const day = rootRef.current?.querySelector<HTMLElement>("td[tabindex='0']");
-      if (day) day.focus();
-      else if (tries++ < 20) frame = requestAnimationFrame(tryFocus);
-    };
-    frame = requestAnimationFrame(tryFocus);
-    return () => cancelAnimationFrame(frame);
-  }, [view]);
-  // ui-sdk's Calendar keeps its own ref on the root, so the root is found from the header.
-  // KB hands `ref` the calendar element.
-  const setHeader = (el: HTMLDivElement | null) => {
-    const root = (el?.parentElement as HTMLDivElement | null) ?? null;
-    rootRef.current = root;
-    if (typeof ref === "function") ref(root);
-    else if (ref) (ref as RefObject<HTMLDivElement | null>).current = root;
-  };
+    if (back) controller.focus(value ?? today);
+  }, [view]); // eslint-disable-line react-hooks/exhaustive-deps -- only when the view changes
 
   const dayLabel = (iso: string) => {
     let text = "";
-    if (utc(iso).getUTCDay() === 1) text += `${copy.week} ${isoWeek(iso)}, `;
+    if (weekday(iso) === 1) text += `${copy.week} ${isoWeek(iso)}, `;
     if (iso === value) text += copy.selectedDatePrefix;
     if (iso === today) text += `${copy.today}, `;
     return text + longDate(iso, lang);
@@ -490,23 +476,25 @@ const LegacyCalendar = forwardRef(function LegacyCalendar(p: LegacyCalendarProps
 
   return (
     <UiCalendar
+      ref={ref}
+      controller={controller}
       className="sj-legacy-cal"
       data-view={view}
       data-weeks={p.hasWeekNumbers || undefined}
       value={value}
-      onValueChange={(next) => typeof next === "string" && p.onPick(next, "day")}
+      onValueChange={(next) => typeof next === "string" && p.onPickDay(next)}
       month={month}
-      onMonthChange={(next) => p.onMonthChange(next)}
+      onMonthChange={p.onMonthChange}
       min={min}
       max={max}
       today={today}
       timeZone={p.timeZone}
-      locale={intlLocale[lang]}
+      locale={locales[lang]}
       weekStartsOn={1}
       showOutsideDays={false}
       disabled={p.disabled}
     >
-      <div className="sj-legacy-cal__header" ref={setHeader}>
+      <div className="sj-legacy-cal__header">
         <div className="sj-legacy-cal__label-wrap">
           <span className="sj-legacy-cal__label" aria-live="polite">
             {heading}
@@ -549,7 +537,7 @@ const LegacyCalendar = forwardRef(function LegacyCalendar(p: LegacyCalendarProps
                 const day = <CalendarDay value={cell.date} className="sj-legacy-cal__day" aria-label={dayLabel(cell.date)} />;
                 // MUI renders hidden days too, so the first week has its number even when it starts
                 // on a Sunday. Here the week's first shown day carries it; CSS moves it first in the row.
-                if (!p.hasWeekNumbers || (utc(cell.date).getUTCDay() !== 1 && !cell.date.endsWith("-01"))) return day;
+                if (!p.hasWeekNumbers || (weekday(cell.date) !== 1 && !cell.date.endsWith("-01"))) return day;
                 return (
                   <>
                     <th className="sj-legacy-cal__week" scope="row" aria-hidden="true">
@@ -567,27 +555,19 @@ const LegacyCalendar = forwardRef(function LegacyCalendar(p: LegacyCalendarProps
             items={
               view === "month"
                 ? Array.from({ length: 12 }, (_, i) => {
-                    const first = `${y}-${pad(i + 1)}-01`;
-                    const last = `${y}-${pad(i + 1)}-${pad(daysIn(y, i + 1))}`;
+                    const [first, last] = monthBounds(y, i + 1);
                     return {
                       key: i + 1,
                       text: monthName(i + 1, lang, "short").replace(".", ""),
                       label: monthName(i + 1, lang),
-                      selected: value?.slice(0, 7) === `${y}-${pad(i + 1)}`,
+                      selected: value?.slice(0, 7) === first.slice(0, 7),
                       disabled: last < min || first > max,
-                      onPick: () => p.onPick(moveTo(y, i + 1), "month"),
+                      onPick: () => pickIn(y, i + 1),
                     };
                   })
                 : Array.from({ length: Number(max.slice(0, 4)) - Number(min.slice(0, 4)) + 1 }, (_, i) => {
                     const year = Number(min.slice(0, 4)) + i;
-                    return {
-                      key: year,
-                      text: String(year),
-                      label: undefined,
-                      selected: value ? ymd(value)[0] === year : year === y,
-                      disabled: false,
-                      onPick: () => p.onPick(moveTo(year, m), "year"),
-                    };
+                    return { key: year, text: String(year), selected: value ? ymd(value)[0] === year : year === y, onPick: () => pickIn(year, m) };
                   })
             }
             kind={view}
@@ -599,7 +579,7 @@ const LegacyCalendar = forwardRef(function LegacyCalendar(p: LegacyCalendarProps
 });
 
 /** MUI's MonthCalendar and YearCalendar: a radio group of buttons, four a row, arrow keys between them. */
-function PickGrid({ items, kind }: { items: { key: number; text: ReactNode; label?: string; selected: boolean; disabled: boolean; onPick: () => void }[]; kind: "month" | "year" }) {
+function PickGrid({ items, kind }: { items: { key: number; text: ReactNode; label?: string; selected: boolean; disabled?: boolean; onPick: () => void }[]; kind: "month" | "year" }) {
   const listRef = useRef<HTMLDivElement>(null);
   const start = Math.max(0, items.findIndex((i) => i.selected));
   const [active, setActive] = useState(start);

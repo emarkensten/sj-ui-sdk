@@ -10,6 +10,14 @@ import { warnOnce } from "../lib/warn";
 export type CustomAttribute = { attribute: string; value: string | number };
 
 /** KB's borderRadiusOverride names, mapped to the radius tokens a field uses. */
+export type Density = "comfortable" | "compact" | "dense" | "tight";
+
+/** Hands an element to a ref the caller passed, function or object. */
+export function assignRef<T>(ref: import("react").Ref<T> | undefined, el: T | null) {
+  if (typeof ref === "function") ref(el);
+  else if (ref) (ref as { current: T | null }).current = el;
+}
+
 export type KbRadius = "capsule" | "circle" | "default" | "large" | "lg" | "md" | "medium" | "sm" | "small" | "xl";
 export const kbRadii: Record<KbRadius, string> = {
   capsule: "capsule", circle: "capsule", default: "xl", large: "lg", lg: "lg", md: "md", medium: "md", sm: "sm", small: "sm", xl: "xl",

@@ -16,12 +16,11 @@ import { Cancel, ChevronDown } from "../icons";
 import { cx } from "../lib/cx";
 import { kbMobileQuery, useMedia } from "../lib/use-media";
 import { MenuItem, MenuItemLayout, type MenuItemProps } from "./menu-item";
-import { customAttr, kbRadii, legacyMarker, useLegacySx, type CustomAttribute, type KbRadius, type LegacySx } from "./shared";
+import { customAttr, kbRadii, legacyMarker, useLegacySx, type CustomAttribute, type KbRadius, type LegacySx, assignRef, type Density } from "./shared";
 
 /** MUI's SelectChangeEvent: what onChange reads is `event.target.value` and `event.target.name`. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MUI types the value as any
 export type SelectChangeEvent<T = any> = Event & { target: { value: T; name: string } };
-type Density = "comfortable" | "compact" | "dense" | "tight";
 
 type InputEvents = "onFocus" | "onBlur" | "onInvalid" | "onKeyDown" | "onKeyUp";
 
@@ -189,8 +188,7 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
 
   const setRefs = (el: HTMLDivElement | null) => {
     rootRef.current = el;
-    if (typeof ref === "function") ref(el);
-    else if (ref) (ref as { current: HTMLDivElement | null }).current = el;
+    assignRef(ref, el);
   };
 
   if (isLoading) {

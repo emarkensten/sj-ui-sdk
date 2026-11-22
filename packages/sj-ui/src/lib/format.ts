@@ -50,8 +50,11 @@ export function durationBetween(from: Date, to: Date): Duration {
   return { days: days || "", hours: Math.floor((total % 1440) / 60), minutes: total % 60 };
 }
 
+const isoDayFormats = new Map<string, Intl.DateTimeFormat>();
 export function isoToday(timeZone = STOCKHOLM) {
-  return new Intl.DateTimeFormat("sv-SE", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  let format = isoDayFormats.get(timeZone);
+  if (!format) isoDayFormats.set(timeZone, (format = new Intl.DateTimeFormat("sv-SE", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" })));
+  return format.format(new Date());
 }
 
 /** "restiden är 2 timmar och 55 minuter", as KB reads it out. */

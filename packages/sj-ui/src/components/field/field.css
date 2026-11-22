@@ -105,8 +105,9 @@
     border-width: 2px;
     border-color: var(--sjse-color-border-focused) !important;
   }
-  /* KB draws no outline ring on text fields: the 2 px border is the focus indicator. */
-  .sj-field :focus-visible { outline: none !important; box-shadow: none !important; }
+  /* KB draws no outline ring on text fields: the 2 px border is the focus indicator. A button in
+     the field that keeps the global ring opts out with data-focus-ring. */
+  .sj-field :focus-visible:not([data-focus-ring]) { outline: none !important; box-shadow: none !important; }
 
   @media (prefers-contrast: more) {
     .sj-field__outline { border-width: 2px; }
