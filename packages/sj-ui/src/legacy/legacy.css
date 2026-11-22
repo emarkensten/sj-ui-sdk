@@ -53,7 +53,7 @@
     font: var(--sjse-typography-body);
     color: var(--sjse-color-text-primary);
     transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    &[data-placement="start"] { flex-direction: row-reverse; justify-content: flex-end; padding-right: 0; padding-left: var(--sjse-spacing-x1_5); }
+    &[data-placement="start"] { flex-direction: row-reverse; padding-right: 0; padding-left: var(--sjse-spacing-x1_5); }
     &[data-placement="top"] { flex-direction: column-reverse; }
     &[data-placement="bottom"] { flex-direction: column; }
     &[data-space-between] { justify-content: space-between; }
@@ -67,8 +67,8 @@
       outline: var(--sjse-focus-outline-width) solid var(--sjse-color-border-focused);
       outline-offset: var(--sjse-focus-outline-width);
       box-shadow: 0 0 0 var(--sjse-focus-outline-extent) var(--sjse-color-background-primary);
-      /* !important like KB's focusResetStyles: KB apps set a global :focus-visible ring with !important. */
-      & :focus-visible { outline: none !important; box-shadow: none !important; }
+      /* KB tries to reset the control's own ring here, but its global ring sits in an earlier
+         cascade layer and wins, so KB shows both rings. Same here. */
     }
     &[data-inset-focus]:has(:focus-visible) {
       outline-offset: calc(var(--sjse-focus-outline-width) * -2);
@@ -77,9 +77,35 @@
     &[data-disabled] { cursor: default; color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-disabled)); }
   }
 
-  /* KB's switch keeps the 12 px margin of the old MUI switch. Legacy only. */
-  .sj-switch[data-sj-legacy] { margin: var(--sjse-spacing-x1_5); }
-  .sj-switch[data-sj-legacy][data-list-offset] { margin-right: calc(-1 * var(--sjse-spacing-x1_5)); }
+  /*
+   * KB's switch is a native checkbox input with role="switch": the thumb is ::after and the state
+   * comes from :checked and :disabled. It shares the track, symbols and variables with .sj-switch.
+   * KB keeps the 12 px margin of the old MUI switch.
+   */
+  input.sj-switch[data-sj-legacy] {
+    appearance: none;
+    flex: 0 1 auto; /* KB's input shrinks in a narrow row */
+    margin: var(--sjse-spacing-x1_5);
+    &[data-list-offset] { margin-right: calc(-1 * var(--sjse-spacing-x1_5)); }
+    &::after {
+      content: "";
+      position: absolute;
+      inset-block: var(--sj-switch-minor-inset);
+      inset-inline: var(--sj-switch-minor-inset) var(--sj-switch-inset);
+      border-radius: var(--sjse-border-radius-capsule);
+      background-color: var(--sjse-color-nonadaptable-light-text);
+      outline: var(--sjse-spacing-x1) solid var(--hover-color);
+      transition: inset 0.25s linear(0, 0.03 1.1%, 0.125 2.4%, 0.906 9.8%, 1.046 12.3%, 1.11 15%, 1.116 16.3%, 1.11 17.8%, 1.014 25.8%, 0.987 31.2%, 1.001 47.2%, 1);
+    }
+    &:checked:not(:disabled) { --accent-color: var(--sjse-color-fill-lov-1); }
+    &:checked::after { inset-inline: var(--sj-switch-inset) var(--sj-switch-minor-inset); }
+    &:disabled { opacity: var(--sjse-opacity-disabled); cursor: not-allowed; }
+    @media (hover: hover) and (pointer: fine) {
+      &:hover:not(:disabled, :focus-visible) { --hover-color: rgb(from var(--hover-base-color) r g b / var(--sjse-opacity-hovered)); }
+      &:active:not(:disabled, :focus-visible) { --hover-color: rgb(from var(--hover-base-color) r g b / var(--sjse-opacity-pressed)); }
+    }
+    @media (prefers-reduced-motion: reduce) { &::after { transition: none; } }
+  }
 }
 
 @layer sj-components {

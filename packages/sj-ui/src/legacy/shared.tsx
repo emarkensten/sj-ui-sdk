@@ -29,7 +29,24 @@ export const legacyMarker = { "data-sj-legacy": "" } as const;
  * - Without it (Lovable, this demo), a small built-in resolver turns the common layout subset into
  *   inline styles and warns in development about everything else.
  */
-export type LegacySx = Record<string, unknown> | ((theme: unknown) => Record<string, unknown>) | ReadonlyArray<unknown> | null | undefined;
+export type LegacySx = object | ((theme: never) => unknown) | ReadonlyArray<unknown> | boolean | null | undefined;
+
+/**
+ * MUI ButtonBase props that KB's types inherit. SJ's theme turns ripple off, so none of them
+ * changes anything in KB either; they are accepted so KB code compiles unchanged.
+ */
+export interface MuiButtonBaseCompat {
+  action?: unknown;
+  centerRipple?: boolean;
+  classes?: unknown;
+  disableRipple?: boolean;
+  disableTouchRipple?: boolean;
+  focusRipple?: boolean;
+  focusVisibleClassName?: string;
+  onFocusVisible?: unknown;
+  TouchRippleProps?: unknown;
+  touchRippleRef?: unknown;
+}
 
 export type SxResolver = (sx: LegacySx) => { className?: string; style?: CSSProperties };
 
@@ -46,7 +63,7 @@ const space = (v: unknown) => (typeof v === "number" ? `calc(var(--sjse-spacing-
 
 /** The built-in resolver: spacing in theme units (1 = 8px) plus a few layout properties. */
 export const builtinSxResolver: SxResolver = (sx) => {
-  if (!sx) return {};
+  if (!sx || sx === true) return {};
   if (typeof sx === "function" || Array.isArray(sx)) {
     warnOnce("sx", "Function and array sx need the SJ style engine. Wrap the app in <LegacySxProvider resolver={useSjSx}>.");
     return {};

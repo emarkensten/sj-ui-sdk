@@ -1,61 +1,48 @@
 /*
- * Legacy Switch: KB's props on the new Switch. Drop-in for `@sj-ab/component-library.ui.switch`.
+ * Legacy Switch: a native `<input type="checkbox" role="switch">`, like KB's.
+ * Drop-in for `@sj-ab/component-library.ui.switch`. Every input attribute, ref and event is the
+ * browser's own, so `event.target`, `inputRef` and forms behave exactly as in KB.
  * Pair it with the legacy FormControlLabel for a visible label, as in KB.
  */
-import type { ChangeEvent, CSSProperties, Ref } from "react";
-import { Switch as NewSwitch } from "../components/switch/switch";
+import type { ChangeEvent, ElementType, InputHTMLAttributes, Ref } from "react";
 import { cx } from "../lib/cx";
-import { warnUnsupported } from "../lib/warn";
-import { syntheticChange } from "./events";
 import { customAttr, legacyMarker, useLegacySx, type CustomAttribute, type LegacySx } from "./shared";
 
-export interface SwitchProps {
+export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange"> {
   name: string;
   checked?: boolean;
-  defaultChecked?: boolean;
   onChange?: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void;
-  disabled?: boolean;
-  required?: boolean;
-  value?: string;
-  id?: string;
-  className?: string;
-  style?: CSSProperties;
   sx?: LegacySx;
   customAttribute?: CustomAttribute;
-  /** Adds the right margin KB uses for a switch at the end of a list row. */
+  /** Pulls the switch 12 px to the right, for a switch at the end of a list row. */
   listOffset?: boolean;
-  inputRef?: Ref<HTMLButtonElement>;
-  "aria-label"?: string;
-  "aria-labelledby"?: string;
-  "aria-describedby"?: string;
-  /** Deprecated in KB too. Use aria-label. */
-  inputProps?: Record<string, unknown>;
-  component?: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- KB's type
+  inputRef?: Ref<any>;
+  /** Deprecated in KB too. Spread onto the input; use aria-label instead. */
+  inputProps?: object | ((ownerState: never) => object);
+  /** Swaps the root element in KB, which breaks the switch there. Ignored. */
+  component?: ElementType;
 }
 
 export function Switch(props: SwitchProps) {
-  const { name, checked, defaultChecked, onChange, disabled, required, value, id, className, style, sx, customAttribute, listOffset, inputRef, inputProps, component: _c, ...aria } = props;
-  warnUnsupported("Switch", props as unknown as Record<string, unknown>, ["component"]);
+  const { checked, className, customAttribute, disabled = false, inputProps, inputRef, listOffset, name, onChange, sx, style, component: _component, ...other } = props;
   const resolved = useLegacySx(sx);
-  const ariaFromInputProps = (inputProps?.["aria-label"] as string | undefined) ?? undefined;
   return (
-    <NewSwitch
+    <input
       {...legacyMarker}
-      {...customAttr(customAttribute)}
-      {...aria}
-      aria-label={aria["aria-label"] ?? ariaFromInputProps}
-      ref={inputRef}
-      id={id}
-      name={name}
-      value={value}
-      required={required}
-      checked={checked}
-      defaultChecked={defaultChecked}
-      disabled={disabled}
-      onCheckedChange={(next, details) => onChange?.(syntheticChange({ checked: next, name, value }, details.event as Event | undefined), next)}
-      className={cx(resolved.className, className)}
-      data-list-offset={listOffset || undefined}
+      type="checkbox"
+      role="switch"
+      className={cx("sj-switch", resolved.className, className)}
       style={{ ...resolved.style, ...style }}
+      checked={checked}
+      disabled={disabled}
+      name={name}
+      data-list-offset={listOffset || undefined}
+      onChange={(event) => onChange?.(event, event.currentTarget.checked)}
+      {...customAttr(customAttribute)}
+      ref={inputRef}
+      {...(typeof inputProps === "object" ? inputProps : null)}
+      {...other}
     />
   );
 }
