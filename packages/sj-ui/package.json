@@ -18,7 +18,8 @@
     "./typography": "./src/components/typography/typography.tsx",
     "./icons": "./src/icons/index.tsx",
     "./agent": "./src/agent/index.ts",
-    "./legacy/*": "./src/legacy/*.tsx"
+    "./legacy/*": "./src/legacy/*.tsx",
+    "./legacy.css": "./src/legacy/legacy.css"
   },
   "scripts": {
     "sync": "node scripts/sync-tokens.mjs && node scripts/sync-icons.mjs",

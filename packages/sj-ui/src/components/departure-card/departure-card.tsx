@@ -13,8 +13,10 @@ export interface Transportation {
   producer?: string;
   /** "Snabbtåg", not "SJ Snabbtåg": the producer is written before it. */
   productName: string;
-  /** Train number, like "1". */
+  /** Stable key for the list. */
   id: string;
+  /** Train number, like "421". Shown after the product name when given. */
+  trainNumber?: string;
 }
 
 export type DepartureAvailability = "available" | "soldOut" | "unavailable" | "cancelled";
@@ -44,8 +46,13 @@ export interface DepartureCardProps {
   lang?: Lang;
   timeZone?: string;
   className?: string;
+  /** Non-interactive content inside the click area, under the card's own content. */
+  footer?: ReactNode;
   /** Rendered after the button, outside the click area, like an accordion with the stops. */
   children?: ReactNode;
+  id?: string;
+  /** Test ids and other data attributes land on the root. */
+  [dataAttr: `data-${string}`]: string | undefined;
 }
 
 const amenityIcons: Record<Amenity, typeof Bistro> = { BISTRO: Bistro, WIFI: WiFi, WHEELCHAIR: Wheelchair };
@@ -74,7 +81,9 @@ export function DepartureCard({
   lang: langProp,
   timeZone = "Europe/Stockholm",
   className,
+  footer,
   children,
+  ...rest
 }: DepartureCardProps) {
   const lang = resolveLang(langProp);
   const text = t(lang);
@@ -89,11 +98,11 @@ export function DepartureCard({
   const blocked = disabled || unavailable;
   const H = `h${headingLevel}` as const;
   const statusText = availability === "soldOut" ? text.soldOut : availability === "cancelled" ? text.cancelled : availability === "unavailable" ? text.unavailable : null;
-  const trains = transportations.map((tr) => `${[tr.producer, tr.productName].filter(Boolean).join(" ")}, ${text.train} ${tr.id}`);
+  const trains = transportations.map((tr) => `${[tr.producer, tr.productName].filter(Boolean).join(" ")}${tr.trainNumber ? `, ${text.train} ${tr.trainNumber}` : ""}`);
   const amenityText = amenities.length ? `${text.amenities}: ${joinList(amenities.map((a) => text.amenity[a] ?? a.toLowerCase()), lang)}` : null;
 
   return (
-    <div className={cx("sj-departure-card", className)} data-selected={selected || undefined} data-availability={availability}>
+    <div {...rest} className={cx("sj-departure-card", className)} data-selected={selected || undefined} data-availability={availability}>
       <UiButton
         className="sj-departure-card__button"
         aria-pressed={selected ?? false}
@@ -137,6 +146,7 @@ export function DepartureCard({
             </span>
           )}
           {badge && <span className="sj-departure-card__badge">{badge}</span>}
+          {footer}
         </span>
       </UiButton>
       {children}

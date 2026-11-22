@@ -1,0 +1,7 @@
+body { background: var(--sjse-color-background-primary); color: var(--sjse-color-text-primary); }
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; align-items: start; }
+.compare__col { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.compare__tag { font: var(--sjse-typography-footnote-emphasized); color: var(--sjse-color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+.compare__frame { display: grid; gap: 16px; padding: 16px; border: 1px dashed var(--sjse-color-border-divider); border-radius: 16px; }
+.compare__log { font: var(--sjse-typography-footnote); color: var(--sjse-color-text-secondary); min-height: 1.25em; font-variant-numeric: tabular-nums; }
+.compare__meta { font: var(--sjse-typography-footnote); color: var(--sjse-color-text-secondary); }

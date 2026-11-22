@@ -1,0 +1,68 @@
+/* Legacy-only styles: KB looks the new API doesn't have. Delete with the legacy folder. */
+@layer sj-components {
+  /* FlowButton colors that sj-button lacks. */
+  .sj-button[data-legacy-color="orange-primary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-hostlov); --label-color: var(--sjse-color-nonadaptable-dark-text); }
+  .sj-button[data-legacy-color="orange-secondary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-sand); }
+  .sj-button[data-legacy-color="black-primary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-svart); --label-color: var(--sjse-color-text-primary-inverted); }
+  .sj-button[data-legacy-color="black-secondary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-sno); }
+  .sj-button[data-legacy-color="white-primary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-vit); --label-color: var(--sjse-color-nonadaptable-dark-text); }
+  .sj-button[data-legacy-color="white-secondary"]:not(:disabled, [data-disabled]) {
+    --accent-color: transparent;
+    --label-color: var(--sjse-color-nonadaptable-light-text);
+    outline: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-nonadaptable-light-text);
+  }
+  .sj-button:is([data-legacy-color="frosted-primary"], [data-legacy-color="frosted-secondary"]):not(:disabled, [data-disabled]) {
+    --accent-color: rgb(from var(--sjse-color-background-primary) r g b / 70%);
+    --label-color: var(--sjse-color-text-primary);
+    backdrop-filter: blur(20px);
+    outline: var(--sjse-border-width-sm, 1px) solid var(--sjse-color-border-divider);
+  }
+
+  .sj-legacy-flow-link { display: inline-block; text-decoration: none; color: inherit; }
+  .sj-legacy-flow-link--full { display: block; width: 100%; }
+  .sj-legacy-flow-link > .sj-button { pointer-events: none; }
+
+  /* isLoading skeletons */
+  .sj-legacy-skeleton {
+    display: inline-block;
+    width: 8rem;
+    height: 3.5rem;
+    border-radius: var(--sjse-border-radius-capsule);
+    background: var(--sjse-color-fill-tertiary, rgb(0 0 0 / 8%));
+    animation: sj-legacy-pulse 1.5s ease-in-out infinite;
+    &[data-size="large"] { height: 3rem; }
+    &[data-size="medium"] { height: 2.5rem; }
+    &[data-size="small"] { height: 2rem; }
+    &[data-full-width] { display: block; width: 100%; }
+  }
+  @keyframes sj-legacy-pulse { 50% { opacity: 0.5; } }
+  @media (prefers-reduced-motion: reduce) { .sj-legacy-skeleton { animation: none; } }
+
+  /* FormControlLabel */
+  .sj-legacy-fcl {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sjse-spacing-x1_5);
+    min-height: 3.25rem;
+    cursor: pointer;
+    font: var(--sjse-typography-body);
+    color: var(--sjse-color-text-primary);
+    &[data-placement="start"] { flex-direction: row-reverse; }
+    &[data-placement="top"] { flex-direction: column-reverse; align-items: flex-start; }
+    &[data-placement="bottom"] { flex-direction: column; align-items: flex-start; }
+    &[data-space-between] { display: flex; justify-content: space-between; }
+    &[data-negative-left] { margin-left: calc(-1 * var(--sjse-spacing-x1_5)); padding-left: var(--sjse-spacing-x1_5); }
+    &[data-disabled] { cursor: not-allowed; opacity: var(--sjse-opacity-disabled, 0.48); }
+  }
+}
+
+@layer sj-components {
+  .sj-legacy-badge {
+    display: inline-block;
+    padding: 0 var(--sjse-spacing-x1);
+    border-radius: var(--sjse-border-radius-capsule);
+    background: var(--sjse-color-fill-ang);
+    font: var(--sjse-typography-footnote-emphasized);
+    justify-self: start;
+  }
+}

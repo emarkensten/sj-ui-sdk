@@ -1,0 +1,50 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@sj-ui-sdk/sj-ui": [
+        "../../packages/sj-ui/src/index.ts"
+      ],
+      "@sj-ui-sdk/sj-ui/icons": [
+        "../../packages/sj-ui/src/icons/index.tsx"
+      ],
+      "@sj-ui-sdk/sj-ui/legacy/*": [
+        "../../packages/sj-ui/src/legacy/*.tsx"
+      ],
+      "react": [
+        "./node_modules/@types/react"
+      ],
+      "react/*": [
+        "./node_modules/@types/react/*"
+      ],
+      "react-dom": [
+        "./node_modules/@types/react-dom"
+      ],
+      "react-dom/*": [
+        "./node_modules/@types/react-dom/*"
+      ]
+    }
+  },
+  "include": [
+    "stories",
+    ".storybook"
+  ]
+}
