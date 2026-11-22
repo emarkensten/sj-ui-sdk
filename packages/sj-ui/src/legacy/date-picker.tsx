@@ -27,7 +27,7 @@ import { isoToday } from "../lib/format";
 import { locales, resolveLang, type Lang } from "../lib/i18n";
 import { kbMobileQuery, useMedia } from "../lib/use-media";
 import { FlowButton } from "./flow-button";
-import { assignRef, customAttr, legacyMarker, useLegacySx, type CustomAttribute, type Density, type KbRadius, kbRadii, type LegacySx } from "./shared";
+import { assignRef, customAttr, hideOthers, legacyMarker, useLegacySx, type CustomAttribute, type Density, type KbRadius, kbRadii, type LegacySx } from "./shared";
 
 /* ---------------- KB's translations (translations.date-picker-translation) ---------------- */
 
@@ -235,6 +235,24 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
     wasOpen.current = open;
   }, [open]);
 
+  // While open, only the calendar is reachable for assistive tech, as KB's modal Popper and sheet.
+  const popupRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    let undo = () => {};
+    const frame = requestAnimationFrame(() => {
+      const popup = popupRef.current;
+      if (!popup) return;
+      undo = hideOthers(popup);
+      // KB has no dialog on desktop, only the calendar. ui-sdk's popover sets the role itself.
+      if (!mobile) {
+        popup.setAttribute("role", "presentation");
+        popup.removeAttribute("aria-labelledby");
+      }
+    });
+    return () => { cancelAnimationFrame(frame); undo(); };
+  }, [open, mobile]);
+
   const setButtonRef = (el: HTMLButtonElement | null) => {
     buttonRef.current = el;
     assignRef(customCalendarButtonRef, el);
@@ -360,10 +378,12 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
           />
         </OutlinedField>
         <PopoverContent
+          ref={popupRef}
           className="sj-legacy-cal-popup"
           data-weeks={hasWeekNumbers || undefined}
           data-presentation={presentation}
-          aria-label={mobile ? copy.dateFieldLabel : undefined}
+          // KB's sheet is a dialog named "Datum", not after the field's button.
+          aria-labelledby={mobile ? `${id}-sheet-title` : undefined}
           anchor={anchor ?? undefined}
           side="bottom"
           align="center"
@@ -375,6 +395,7 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
           style={props.zIndexCalendar ? { zIndex: props.zIndexCalendar } : undefined}
           {...customAttr(customAttribute)}
         >
+          {mobile && <span id={`${id}-sheet-title`} hidden>{copy.dateFieldLabel}</span>}
           {mobile && <PopoverClose className="sj-visually-hidden">{copy.close}</PopoverClose>}
           <LegacyCalendar
             ref={ref}
@@ -524,7 +545,7 @@ const LegacyCalendar = forwardRef(function LegacyCalendar(p: LegacyCalendarProps
       <div className="sj-legacy-cal__view">
         {view === "day" ? (
           <CalendarGrid className="sj-legacy-cal__grid">
-            <CalendarWeekdays className="sj-legacy-cal__weekdays">
+            <CalendarWeekdays className="sj-legacy-cal__weekdays" role="presentation">
               {(index) => (
                 <>
                   {p.hasWeekNumbers && index === 0 && <th className="sj-legacy-cal__week" aria-hidden="true" />}
@@ -536,7 +557,12 @@ const LegacyCalendar = forwardRef(function LegacyCalendar(p: LegacyCalendarProps
             </CalendarWeekdays>
             <CalendarWeeks className="sj-legacy-cal__weeks">
               {(cell) => {
-                const day = <CalendarDay value={cell.date} className="sj-legacy-cal__day" aria-label={dayLabel(cell.date)} />;
+                // The number is hidden so VoiceOver reads only the label, once, as with KB.
+                const day = (
+                  <CalendarDay value={cell.date} className="sj-legacy-cal__day" aria-label={dayLabel(cell.date)}>
+                    <span aria-hidden="true">{Number(cell.date.slice(8))}</span>
+                  </CalendarDay>
+                );
                 // MUI renders hidden days too, so the first week has its number even when it starts
                 // on a Sunday. Here the week's first shown day carries it; CSS moves it first in the row.
                 if (!p.hasWeekNumbers || (weekday(cell.date) !== 1 && !cell.date.endsWith("-01"))) return day;
