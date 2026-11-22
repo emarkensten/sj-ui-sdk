@@ -338,12 +338,13 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
           >
             <div className="sj-legacy-menu__header">
               <h1 className="sj-legacy-menu__title" id={`${labelId}-sheet-title`}>{labelText}</h1>
-              <button type="button" className="sj-legacy-menu__close" aria-label={closeLabel[lang]} onClick={(e) => {
+              {/* KB wraps the sheet's close button in a nav. */}
+              <nav className="sj-legacy-menu__nav"><button type="button" className="sj-legacy-menu__close" aria-label={closeLabel[lang]} onClick={(e) => {
                 if (open === undefined) setInnerOpen(false);
                 onClose?.(e);
               }}>
                 <Cancel />
-              </button>
+              </button></nav>
             </div>
             <SelectList className="sj-legacy-menu__list" tabIndex={-1} aria-label={mobile ? labelText : ""}>
               {nodes.map((n, i) => {
