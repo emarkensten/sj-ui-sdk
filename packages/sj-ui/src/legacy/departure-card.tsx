@@ -125,6 +125,8 @@ function toText(translation: object | undefined): Partial<DepartureCardText> | u
     ["srLoadingPrice", "loadingPrice"],
     ["srLoadingComfortAvailability", "loadingComfort"],
     ["srTravelDetails", "travelDetails"],
+    ["srDepartureTime", "departureTime"],
+    ["srArrivalTime", "arrivalTime"],
   ] as const) {
     if (tr[from] !== undefined) out[to] = tr[from];
   }

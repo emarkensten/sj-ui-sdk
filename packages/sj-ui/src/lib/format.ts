@@ -1,4 +1,4 @@
-import { joinList, locales, resolveLang, t } from "./i18n";
+import { locales, resolveLang, t } from "./i18n";
 
 const STOCKHOLM = "Europe/Stockholm";
 
@@ -57,18 +57,18 @@ export function isoToday(timeZone = STOCKHOLM) {
   return format.format(new Date());
 }
 
-/** "restiden är 2 timmar och 55 minuter", as KB reads it out. */
+/**
+ * "Restiden är 2 timmar och 55 minuter", word for word as KB reads it out: days count as 24
+ * hours, minutes are left out when zero unless there are no hours.
+ */
 export function spokenDuration(duration: Duration | undefined, lang?: string) {
   if (!duration) return "";
   const d = t(lang);
+  const hours = (parseInt(String(duration.days ?? ""), 10) || 0) * 24 + (parseInt(String(duration.hours ?? ""), 10) || 0);
+  const minutes = parseInt(String(duration.minutes ?? ""), 10) || 0;
+  const unit = (n: number, [one, many]: readonly string[]) => `${n} ${n === 1 ? one : many}`;
   const parts: string[] = [];
-  const add = (v: string | number | undefined, [one, many]: string[]) => {
-    const n = Number(v);
-    if (n) parts.push(`${n} ${n === 1 ? one : many}`);
-  };
-  add(duration.days, d.spokenUnits.day);
-  add(duration.hours, d.spokenUnits.hour);
-  add(duration.minutes, d.spokenUnits.minute);
-  if (!parts.length) return "";
-  return `${d.travelTimeSr} ${joinList(parts, lang)}`;
+  if (hours > 0) parts.push(unit(hours, d.spokenUnits.hour));
+  if (minutes > 0 || hours === 0) parts.push(unit(minutes, d.spokenUnits.minute));
+  return `${d.travelTimeSr} ${parts.join(` ${d.and} `)}`;
 }

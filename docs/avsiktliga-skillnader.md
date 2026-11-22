@@ -26,3 +26,14 @@ Två fel i KB är kvar med flit, eftersom team kan ha byggt runt dem:
 - 41 props som KB:s typer ärver från TextField (till exempel `onBlur`, `onFocus`, `inputRef`, `error`, `name` och `InputProps`) läser KB aldrig. sj-ui tar emot dem så att koden kompilerar, och gör inte heller något med dem. Listan står som `KbIgnoredProp` i `packages/sj-ui/src/legacy/date-picker.tsx`. Prop-täckningen räknar dem som stödda.
 
 Allt annat, även masken när man skriver (`2026-12-24`), att en ensiffrig dag får en nolla när fältet lämnas, mobilens skrivskyddade fält som öppnar ett ark, veckonumren och fokus i månads- och årsvyn, är som i KB. Se Storybook, *Jämförelse/DatePicker*.
+
+## DepartureCard
+
+Skärmläsartexten är KB:s ord för ord, med samma kommatecken och tågnumret från `id`. Fyra fel i KB:s text är rättade:
+
+| Vad | KB i dag | sj-ui | Varför |
+|---|---|---|---|
+| Tider i skärmläsartexten | Läses i webbläsarens tidszon, inte i `timeZone`. Utanför Sverige säger skärmläsaren en annan tid än kortet visar. | Läses i `timeZone`, samma som det synliga. | Skärmläsaren ska säga det som står. |
+| Pris i euro | "49,5 svenska kronor" | "49,50 euro" | Fel valuta. |
+| `hidePricePrefix` | Prefixet döljs men läses ändå: "pris från 495". | "pris 495", som det synliga. | Skärmläsaren ska säga det som står. |
+| Utan pris (`showPrice` och `showPoints` av) | "pris ," | Ingenting om pris. | KB:s kända brist. |

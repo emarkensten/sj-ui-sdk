@@ -17,6 +17,8 @@ export const departureCardText = {
     loadingPrice: "Hämtar pris",
     loadingComfort: "Hämtar reseklasser",
     travelDetails: "resedetaljer",
+    departureTime: "Avgår",
+    arrivalTime: "ankommer",
   },
   en: {
     status: {"unavailable":"Unavailable","salesStop":"No more tickets are sold","soldOut":"Sold out","existingTicket":"Your journey","error":"Can't show price","tooFewPrioPoints":"More SJ Prio points needed","POTENTIAL_MAINT":"Track maintenance in planning","CANCELLED":"Cancelled","NOT_RELEASED":"Released later","DISTURBANCE":"Traffic disruption","TEMP_SALES_STOP":"Currently not sold","NOT_CONFIRMED":"Preliminary","POTENTIAL_CANCEL":"Preliminary","SALES_STOP":"Fully booked","SOLD_OUT":"Sold out","DEPARTURE_TIME_PASSED":"Departed","NO_OFFERS":"Unavailable","NO_DEPARTURE":"Unavailable","WCHAIR_UNAVAILABLE":"No wheelchair space","WCHAIR_COMP_UNAVAILABLE":"Unavailable","PETS_UNAVAILABLE":"Pet seat can't be guaranteed","PETS_NO_UNAVAILABLE":"No pet-free seats","NOT_VALID_FOR_REBOOK":"Unavailable","TOO_FEW_PRIO_POINTS":"More SJ Prio points needed","PASSENGER_NOT_VALID_FOR_EURO_NIGHT":"Unavailable","OFFER_IN_CONFLICT_WITH_PREVIOUS_BOOKING_WITH_TRAVEL_PASS":"Another booking at the same time","UNAVAILABLE":"Unavailable","ERROR":"Can't show price","WCHAIR_NIGHT_TRAIN_HANDLED_BY_CUSTOMER_SERVICE":"Book via Customer service","EQUIPMENT_MISSING":"Currently not sold"} as Record<UnavailableReason, string>,
@@ -29,6 +31,8 @@ export const departureCardText = {
     loadingPrice: "Loading price",
     loadingComfort: "Loading travel classes",
     travelDetails: "travel details",
+    departureTime: "Departure time",
+    arrivalTime: "Arrival time",
   },
 };
 
