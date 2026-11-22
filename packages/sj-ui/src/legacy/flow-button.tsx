@@ -122,7 +122,8 @@ export const FlowButton = forwardRef(function FlowButton(props: FlowButtonProps,
       htmlType={isLink ? undefined : type}
       color={mapped.color}
       size={sizes[size]}
-      borderShape={symbolPosition === "top" && symbol ? "roundedLarge" : "capsule"}
+      borderShape="capsule"
+      data-legacy-top={symbolPosition === "top" && symbol ? "" : undefined}
       icon={symbol}
       iconPosition={symbolPosition}
       showSpinner={shouldShowSpinner}

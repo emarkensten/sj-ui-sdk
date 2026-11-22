@@ -1,11 +1,11 @@
 /* Legacy-only styles: KB looks the new API doesn't have. Delete with the legacy folder. */
 @layer sj-components {
   /* FlowButton colors that sj-button lacks. */
-  .sj-button[data-legacy-color="orange-primary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-hostlov); --label-color: var(--sjse-color-nonadaptable-dark-text); }
+  .sj-button[data-legacy-color="orange-primary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-hostlov); --label-color: var(--sjse-color-nonadaptable-light-text); }
   .sj-button[data-legacy-color="orange-secondary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-sand); }
   .sj-button[data-legacy-color="black-primary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-svart); --label-color: var(--sjse-color-text-primary-inverted); }
   .sj-button[data-legacy-color="black-secondary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-sno); }
-  .sj-button[data-legacy-color="white-primary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-fill-vit); --label-color: var(--sjse-color-nonadaptable-dark-text); }
+  .sj-button[data-legacy-color="white-primary"]:not(:disabled, [data-disabled]) { --accent-color: var(--sjse-color-nonadaptable-light-text); --label-color: var(--sjse-color-nonadaptable-dark-text); } /* KB: vitNonAdaptable, white in both modes */
   .sj-button[data-legacy-color="white-secondary"]:not(:disabled, [data-disabled]) {
     --accent-color: transparent;
     --label-color: var(--sjse-color-nonadaptable-light-text);
@@ -22,22 +22,32 @@
 
   /* FlowButton: 12 px between symbol and text at every size (4 px above text), symbol at its own size. */
   .sj-button[data-legacy-flow] .sj-button__label { --sj-button-gap: var(--sjse-spacing-x1_5) !important; --sj-button-symbol-size: auto !important; }
-  .sj-button[data-legacy-flow][data-icon-position="top"] .sj-button__label { --sj-button-gap: var(--sjse-spacing-x0_5) !important; }
+  /* KB lets a long label wrap, centered, inside the available width. */
+  .sj-button[data-legacy-flow] { max-width: 100%; }
+  .sj-button[data-legacy-flow] :is(.sj-button__label, .sj-button__text) { white-space: normal; text-align: center; }
+  /* KB's height is padding + content, with no minimum. Without the -1px block margins the label gives that. */
+  .sj-button[data-legacy-flow] .sj-button__label { margin-block: 0; }
+  /* KB stacks a top symbol at every size and gives the button its default radius, not a capsule. */
+  .sj-button[data-legacy-flow][data-legacy-top] {
+    border-radius: var(--sjse-border-radius-default);
+    & .sj-button__label { grid-template-columns: auto; grid-template-areas: "symbol" "text"; --sj-button-gap: var(--sjse-spacing-x0_5) !important; }
+  }
 
   /* isLoading skeletons */
   .sj-legacy-skeleton {
+    /* MUI's Skeleton: text color at 11 % (13 % in dark), pulse to 40 % over 2 s after 0.5 s. */
     display: inline-block;
-    width: 8rem;
+    width: calc(153rem / 16);
     height: 3.5rem;
     border-radius: var(--sjse-border-radius-capsule);
-    background: var(--sjse-color-fill-tertiary, rgb(0 0 0 / 8%));
-    animation: sj-legacy-pulse 1.5s ease-in-out infinite;
+    background: light-dark(rgb(0 0 0 / 0.11), rgb(255 255 255 / 0.13));
+    animation: sj-legacy-pulse 2s ease-in-out 0.5s infinite;
     &[data-size="large"] { height: 3rem; }
     &[data-size="medium"] { height: 2.5rem; }
     &[data-size="small"] { height: 2rem; }
     &[data-full-width] { display: block; width: 100%; }
   }
-  @keyframes sj-legacy-pulse { 50% { opacity: 0.5; } }
+  @keyframes sj-legacy-pulse { 50% { opacity: 0.4; } }
   @media (prefers-reduced-motion: reduce) { .sj-legacy-skeleton { animation: none; } }
 
   /* FormControlLabel: KB's MUI FormControlLabel. The row takes hover and the focus ring. */

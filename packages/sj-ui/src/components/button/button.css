@@ -80,9 +80,11 @@
     }
 
     /* Colors (filled and tinted) */
-    &:is([data-color="gras"], [data-color="himmel"], [data-color="raps"], [data-type="tinted"]):not([data-type="outlined"], [data-type="gray"], [data-type="plain"]) {
-      &:not(:disabled, [data-disabled]) { --label-color: var(--sjse-color-nonadaptable-dark-text); }
-      & .sj-button__label { font: var(--sjse-typography-body); }
+    &:is([data-color="gras"], [data-color="himmel"], [data-color="raps"]):not([data-type="outlined"], [data-type="gray"], [data-type="plain"], [data-type="tinted"]):not(:disabled, [data-disabled]) {
+      --label-color: var(--sjse-color-nonadaptable-dark-text);
+    }
+    &:is([data-color="gras"], [data-color="himmel"], [data-color="raps"], [data-type="tinted"]):not([data-type="outlined"], [data-type="gray"], [data-type="plain"]) .sj-button__label {
+      font: var(--sjse-typography-body);
     }
     &[data-type="filled"]:not(:disabled, [data-disabled]) {
       &[data-color="gras"] { --accent-color: var(--sjse-color-fill-gras); }
