@@ -298,7 +298,8 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
         onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => {
           if (event.key === "Enter") confirmTyped(event.currentTarget.value);
         },
-        onChange,
+        // Always a handler, so React doesn't call the field read-only when the team passes none.
+        onChange: (event: ChangeEvent<HTMLInputElement>) => onChange?.(event),
       };
 
   const buttonLabel = selected
