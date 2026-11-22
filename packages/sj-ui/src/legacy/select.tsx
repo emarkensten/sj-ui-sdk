@@ -322,6 +322,14 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
             role={mobile ? "dialog" : "presentation"}
             aria-modal={mobile || undefined}
             aria-labelledby={mobile ? `${labelId}-sheet-title` : undefined}
+            // MUI's menu: Tab closes it and focus goes back to the field, not on to the page.
+            onKeyDown={(e) => {
+              if (mobile || e.key !== "Tab") return;
+              e.preventDefault();
+              if (open === undefined) setInnerOpen(false);
+              onClose?.(e);
+              requestAnimationFrame(() => rootRef.current?.querySelector<HTMLElement>("[role=combobox]")?.focus());
+            }}
           >
             <div className="sj-legacy-menu__header">
               <h1 className="sj-legacy-menu__title" id={`${labelId}-sheet-title`}>{labelText}</h1>

@@ -27,7 +27,7 @@ import { isoToday } from "../lib/format";
 import { locales, resolveLang, type Lang } from "../lib/i18n";
 import { kbMobileQuery, useMedia } from "../lib/use-media";
 import { FlowButton } from "./flow-button";
-import { assignRef, customAttr, legacyMarker, useLegacySx, type CustomAttribute, type Density, type KbRadius, kbRadii, type LegacySx } from "./shared";
+import { assignRef, customAttr, hideOthers, legacyMarker, useLegacySx, type CustomAttribute, type Density, type KbRadius, kbRadii, type LegacySx } from "./shared";
 
 /* ---------------- KB's translations (translations.date-picker-translation) ---------------- */
 
@@ -235,6 +235,24 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
     wasOpen.current = open;
   }, [open]);
 
+  // While open, only the calendar is reachable for assistive tech, as KB's modal Popper and sheet.
+  const popupRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    let undo = () => {};
+    const frame = requestAnimationFrame(() => {
+      const popup = popupRef.current;
+      if (!popup) return;
+      undo = hideOthers(popup);
+      // KB has no dialog on desktop, only the calendar. ui-sdk's popover sets the role itself.
+      if (!mobile) {
+        popup.setAttribute("role", "presentation");
+        popup.removeAttribute("aria-labelledby");
+      }
+    });
+    return () => { cancelAnimationFrame(frame); undo(); };
+  }, [open, mobile]);
+
   const setButtonRef = (el: HTMLButtonElement | null) => {
     buttonRef.current = el;
     assignRef(customCalendarButtonRef, el);
@@ -360,6 +378,7 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
           />
         </OutlinedField>
         <PopoverContent
+          ref={popupRef}
           className="sj-legacy-cal-popup"
           data-weeks={hasWeekNumbers || undefined}
           data-presentation={presentation}
@@ -526,7 +545,7 @@ const LegacyCalendar = forwardRef(function LegacyCalendar(p: LegacyCalendarProps
       <div className="sj-legacy-cal__view">
         {view === "day" ? (
           <CalendarGrid className="sj-legacy-cal__grid">
-            <CalendarWeekdays className="sj-legacy-cal__weekdays">
+            <CalendarWeekdays className="sj-legacy-cal__weekdays" role="presentation">
               {(index) => (
                 <>
                   {p.hasWeekNumbers && index === 0 && <th className="sj-legacy-cal__week" aria-hidden="true" />}
