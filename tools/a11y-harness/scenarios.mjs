@@ -6,16 +6,19 @@
  *        before the component, so the first Tab lands on it.
  * mobile: also run every story at 375 x 812, for components that switch to a sheet below 600 px.
  * vo:     the stories VoiceOver walks through (real speech is slow, so a few per component),
- *         and the keys it presses after reading the component at rest.
+ *         and the steps after reading the component at rest. The VoiceOver cursor starts on the first
+ *         item in the page. "VO:next" is VO-Right, "VO:act" is VO-Space (how VoiceOver users press
+ *         things); other steps are keys. Tab is left to the fast checks: Safari's Tab skips buttons
+ *         without tabindex by default, which the fast checks in WebKit already show.
  */
 export const components = {
   FlowButton: {
     flows: { "Tab, Enter, Space": ["Tab", "Enter", " "] },
-    vo: { stories: ["Grön", "Inaktiv", "Spinner", "Symbol höger", "Länk"], keys: ["Tab", "Enter"] },
+    vo: { stories: ["Grön", "Inaktiv", "Spinner", "Symbol höger", "Länk"], keys: ["VO:act"] },
   },
   Switch: {
     flows: { "Tab, Space, Space": ["Tab", " ", " "] },
-    vo: { stories: ["Med etikett", "Av", "Inaktiverad", "Utan etikett", "Obligatorisk"], keys: ["Tab", " ", " "] },
+    vo: { stories: ["Med etikett", "Av", "Inaktiverad", "Utan etikett", "Obligatorisk"], keys: ["VO:act", "VO:act"] },
   },
   Select: {
     mobile: true,
@@ -25,7 +28,7 @@ export const components = {
       "Pil ned på stängd lista": ["Tab", "ArrowDown"],
       "Tab ut ur öppen lista": ["Tab", "Enter", "Tab"],
     },
-    vo: { stories: ["Standard"], keys: ["Tab", " ", "ArrowDown", "Enter"] },
+    vo: { stories: ["Standard"], keys: ["VO:act", "ArrowDown", "Enter"] },
   },
   DatePicker: {
     mobile: true,
@@ -34,11 +37,11 @@ export const components = {
       "Öppna kalendern och stäng med Esc": ["Tab", "Tab", "Enter", "Escape"],
       "Tab genom öppen kalender": ["Tab", "Tab", "Enter", "Tab", "Tab", "Tab"],
     },
-    vo: { stories: ["Standard", "Fel (errorHelperText)"], keys: ["Tab", "Tab", "Enter", "ArrowRight", "Enter"] },
+    vo: { stories: ["Standard", "Fel (errorHelperText)"], keys: ["VO:next", "VO:act", "ArrowRight", "Enter"] },
   },
   DepartureCard: {
     flows: { "Tab, Enter, Tab": ["Tab", "Enter", "Tab"] },
-    vo: { stories: ["Bokningsbar", "Slutsåld", "Inställd", "Nattåg", "Utan pris", "Reseklasser"], keys: ["Tab", "Enter"] },
+    vo: { stories: ["Bokningsbar", "Slutsåld", "Inställd", "Nattåg", "Utan pris", "Reseklasser"], keys: ["VO:act"] },
   },
 };
 

@@ -65,6 +65,9 @@ const SAFARI_UI = /verktygsfält|toolbar|avdelare|splitter|flikfält|tab bar|adr
  * reaches the web content, then interact with it (VO-Shift-Down). Returns false if it never got there.
  */
 async function enterPage(voiceOver, macOSActivate, url) {
+  // Leave the previous page first: after interact() VoiceOver stays inside the old web area, and
+  // would never announce "webbinnehåll" for the new one.
+  for (let i = 0; i < 3; i++) await voiceOver.stopInteracting().catch(() => {});
   safari(url);
   await sleep(2500);
   await macOSActivate("Safari");
@@ -113,7 +116,11 @@ export async function runVoiceOver({ base, targets, log = console.log }) {
           if (!(await enterPage(voiceOver, macOSActivate, url))) throw new Error("VoiceOver nådde inte sidans innehåll inför tangentbordsflödet.");
           for (const key of t.keys) {
             await voiceOver.clearSpokenPhraseLog();
-            await voiceOver.press(vokey(key));
+            // "VO:next" moves the VoiceOver cursor (VO-Right), "VO:act" activates the item under it
+            // (VO-Space), as a VoiceOver user does. Anything else is a key press.
+            if (key === "VO:next") await voiceOver.next();
+            else if (key === "VO:act") await voiceOver.act();
+            else await voiceOver.press(vokey(key));
             await sleep(900);
             let spoken = (await voiceOver.spokenPhraseLog()).map(tidy).filter(Boolean);
             if (!spoken.length) spoken = [tidy(await voiceOver.lastSpokenPhrase())].filter(Boolean);
