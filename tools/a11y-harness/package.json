@@ -1,0 +1,20 @@
+{
+  "name": "sj-a11y-harness",
+  "private": true,
+  "type": "module",
+  "description": "Automated accessibility comparison of KB and sj-ui in the Storybook comparisons: accessibility tree, keyboard flows, axe, and real VoiceOver in Safari.",
+  "scripts": {
+    "a11y": "node run.mjs",
+    "a11y:fast": "node run.mjs --no-vo",
+    "a11y:vo": "node run.mjs --vo-only",
+    "setup:mac": "node setup-mac.mjs"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@guidepup/guidepup": "^0.40.0",
+    "playwright": "1.63.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
