@@ -11,11 +11,11 @@ export interface FormControlLabelProps {
   control: ReactElement;
   label: ReactNode;
   labelPlacement?: "start" | "end" | "top" | "bottom";
-  /** KB's alignment helper. Only the left side is supported, which is what SJ's guidelines use. */
+  /** KB's alignment helper: -12 px on the chosen sides. SJ's guidelines use only the left. */
   negativeMargins?: boolean | { top?: boolean; right?: boolean; bottom?: boolean; left?: boolean };
   /** Label and control at opposite ends, as in SJ's settings rows. */
   spaceBetween?: boolean;
-  /** Accepted for compatibility. The new focus ring is always drawn on the control. */
+  /** Draws the focus ring inside the row, for rows in a list or a card. */
   insetFocus?: boolean;
   disabled?: boolean;
   className?: string;
@@ -25,19 +25,24 @@ export interface FormControlLabelProps {
   id?: string;
 }
 
-export function FormControlLabel({ control, label, labelPlacement = "end", negativeMargins, spaceBetween, disabled, className, style, sx, customAttribute, id }: FormControlLabelProps) {
+export function FormControlLabel({ control, label, labelPlacement = "end", negativeMargins, spaceBetween, insetFocus, disabled, className, style, sx, customAttribute, id }: FormControlLabelProps) {
   const resolved = useLegacySx(sx);
-  const left = negativeMargins === true || (typeof negativeMargins === "object" && negativeMargins.left);
+  const neg = (side: "top" | "right" | "bottom" | "left") => negativeMargins === true || (typeof negativeMargins === "object" && !!negativeMargins[side]) || undefined;
   return (
     <label
       {...legacyMarker}
       {...customAttr(customAttribute)}
       id={id}
       className={cx("sj-legacy-fcl", resolved.className, className)}
+      data-sj-focus-row=""
       style={{ ...resolved.style, ...style }}
       data-placement={labelPlacement}
       data-space-between={spaceBetween || undefined}
-      data-negative-left={left || undefined}
+      data-neg-top={neg("top")}
+      data-neg-right={neg("right")}
+      data-neg-bottom={neg("bottom")}
+      data-neg-left={neg("left")}
+      data-inset-focus={insetFocus || undefined}
       data-disabled={disabled || undefined}
     >
       {disabled && (control.props as { disabled?: boolean }).disabled === undefined ? cloneElement(control as ReactElement<{ disabled?: boolean }>, { disabled: true }) : control}

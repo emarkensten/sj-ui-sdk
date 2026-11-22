@@ -54,7 +54,8 @@ export function Switch(props: SwitchProps) {
       disabled={disabled}
       onCheckedChange={(next, details) => onChange?.(syntheticChange({ checked: next, name, value }, details.event as Event | undefined), next)}
       className={cx(resolved.className, className)}
-      style={{ ...(listOffset ? { marginRight: "var(--sjse-spacing-x1)" } : null), ...resolved.style, ...style }}
+      data-list-offset={listOffset || undefined}
+      style={{ ...resolved.style, ...style }}
     />
   );
 }

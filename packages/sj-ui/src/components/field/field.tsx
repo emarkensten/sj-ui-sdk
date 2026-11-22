@@ -55,11 +55,11 @@ export function OutlinedField({
       data-external-label={externalLabel || undefined}
       data-full-width={fullWidth || undefined}
       data-has-start={start ? "" : undefined}
+      data-required={required || undefined}
     >
       {label && (
         <FieldLabel className="sj-field__label">
           {label}
-          {required && <span aria-hidden="true"> *</span>}
         </FieldLabel>
       )}
       <div className="sj-field__box">
@@ -71,7 +71,6 @@ export function OutlinedField({
             <legend>
               <span>
                 {label}
-                {required && " *"}
               </span>
             </legend>
           ) : (

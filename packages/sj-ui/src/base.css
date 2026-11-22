@@ -20,3 +20,21 @@
     border: 0;
   }
 }
+
+@layer sj-components {
+  /*
+   * The focus ring, as KB's MUI theme sets it on :root (themeOptions.js, focusVisibleStyles):
+   * a 2 px outline in border-focused, offset by its width, with a halo in the background color.
+   * !important like KB. It sits in the sj-components layer, not sj-base, because an !important
+   * in an earlier layer would beat the components' own !important resets.
+   */
+  :root {
+    --sjse-focus-outline-width: calc(2rem / 16);
+    --sjse-focus-outline-offset: var(--sjse-focus-outline-width);
+  }
+  :root *:focus-visible {
+    outline: var(--sjse-focus-outline-width) solid var(--sjse-color-border-focused) !important;
+    outline-offset: var(--sjse-focus-outline-offset) !important;
+    box-shadow: 0 0 0 calc(var(--sjse-focus-outline-width) * 3) var(--sjse-color-background-primary) !important;
+  }
+}

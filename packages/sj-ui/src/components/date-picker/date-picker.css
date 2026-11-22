@@ -22,8 +22,10 @@
     min-height: 3.5rem;
     padding: 0 0.5rem 0 1rem;
     font: var(--sjse-typography-body);
-    color: var(--sjse-color-text-primary);
+    color: transparent;
+    caret-color: var(--sjse-color-border-focused);
     &::placeholder { color: transparent; }
+    &:focus { color: var(--sjse-color-text-primary); }
   }
 
   /* The friendly date covers the ISO text until the field gets focus. */
@@ -36,7 +38,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    background: var(--sjse-color-background-primary-level-1, var(--sjse-color-background-primary, #fff));
     font: var(--sjse-typography-body);
     color: var(--sjse-color-text-primary);
   }
@@ -50,14 +51,13 @@
     flex: none;
     display: grid;
     place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    margin-right: 0.375rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-right: 0.5rem;
     border-radius: 50%;
     cursor: pointer;
     color: var(--sjse-color-text-primary);
     &:hover:not([data-disabled]) { background: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered, 0.08)); }
-    &:focus-visible { outline: 2px solid var(--sjse-color-border-focused, currentColor); outline-offset: -2px; }
     &[data-disabled] { opacity: var(--sjse-opacity-disabled, 0.48); cursor: not-allowed; }
     & svg { width: 1.5rem; height: 1.5rem; }
   }

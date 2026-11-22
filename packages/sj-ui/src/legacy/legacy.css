@@ -36,22 +36,46 @@
   @keyframes sj-legacy-pulse { 50% { opacity: 0.5; } }
   @media (prefers-reduced-motion: reduce) { .sj-legacy-skeleton { animation: none; } }
 
-  /* FormControlLabel */
+  /* FormControlLabel: KB's MUI FormControlLabel. The row takes hover and the focus ring. */
   .sj-legacy-fcl {
-    display: inline-flex;
+    --sj-legacy-fcl-neg: calc(-1 * var(--sjse-spacing-x1_5));
+    display: flex;
     align-items: center;
-    gap: var(--sjse-spacing-x1_5);
-    min-height: 3.25rem;
+    position: relative;
+    padding-right: var(--sjse-spacing-x1_5);
+    border-radius: var(--sjse-border-radius-default);
     cursor: pointer;
+    user-select: text;
     font: var(--sjse-typography-body);
     color: var(--sjse-color-text-primary);
-    &[data-placement="start"] { flex-direction: row-reverse; }
-    &[data-placement="top"] { flex-direction: column-reverse; align-items: flex-start; }
-    &[data-placement="bottom"] { flex-direction: column; align-items: flex-start; }
-    &[data-space-between] { display: flex; justify-content: space-between; }
-    &[data-negative-left] { margin-left: calc(-1 * var(--sjse-spacing-x1_5)); padding-left: var(--sjse-spacing-x1_5); }
-    &[data-disabled] { cursor: not-allowed; opacity: var(--sjse-opacity-disabled, 0.48); }
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    &[data-placement="start"] { flex-direction: row-reverse; justify-content: flex-end; padding-right: 0; padding-left: var(--sjse-spacing-x1_5); }
+    &[data-placement="top"] { flex-direction: column-reverse; }
+    &[data-placement="bottom"] { flex-direction: column; }
+    &[data-space-between] { justify-content: space-between; }
+    &[data-neg-top] { margin-top: var(--sj-legacy-fcl-neg); }
+    &[data-neg-right] { margin-right: var(--sj-legacy-fcl-neg); }
+    &[data-neg-bottom] { margin-bottom: var(--sj-legacy-fcl-neg); }
+    &[data-neg-left] { margin-left: var(--sj-legacy-fcl-neg); }
+    @media (hover: hover) { &:hover:not([data-disabled]) { background-color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered)); } }
+    &:active:not([data-disabled]) { background-color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-pressed)); }
+    &:has(:focus-visible) {
+      outline: var(--sjse-focus-outline-width) solid var(--sjse-color-border-focused);
+      outline-offset: var(--sjse-focus-outline-width);
+      box-shadow: 0 0 0 var(--sjse-focus-outline-extent) var(--sjse-color-background-primary);
+      /* !important like KB's focusResetStyles: KB apps set a global :focus-visible ring with !important. */
+      & :focus-visible { outline: none !important; box-shadow: none !important; }
+    }
+    &[data-inset-focus]:has(:focus-visible) {
+      outline-offset: calc(var(--sjse-focus-outline-width) * -2);
+      box-shadow: inset 0 0 0 var(--sjse-focus-outline-extent) var(--sjse-color-background-primary);
+    }
+    &[data-disabled] { cursor: default; color: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-disabled)); }
   }
+
+  /* KB's switch keeps the 12 px margin of the old MUI switch. Legacy only. */
+  .sj-switch[data-sj-legacy] { margin: var(--sjse-spacing-x1_5); }
+  .sj-switch[data-sj-legacy][data-list-offset] { margin-right: calc(-1 * var(--sjse-spacing-x1_5)); }
 }
 
 @layer sj-components {

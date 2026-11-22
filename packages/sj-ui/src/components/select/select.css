@@ -9,7 +9,7 @@
     gap: var(--sjse-spacing-x1);
     min-width: 0;
     min-height: 3.5rem;
-    padding: 0 0.75rem 0 1rem;
+    padding: 0 1rem;
     cursor: pointer;
     border-radius: inherit;
     font: var(--sjse-typography-body);

@@ -40,11 +40,6 @@
       width: 100%;
     }
 
-    &:focus-visible {
-      outline: 2px solid var(--sjse-color-border-focused, currentColor);
-      outline-offset: 2px;
-    }
-
     /* Size */
     &[data-size="large"] {
       min-height: 3rem;
