@@ -34,6 +34,10 @@ CSS-lagerordning: `@layer sj-tokens, sj-base, ui-sdk, sj-components;`. Tokens li
 | `DepartureCard disabled` | Stoppar klicket (KB:s bugg: når inte kortets knapp) |
 | `id` på Select och DatePicker | Saknas än: hamnar på en omslutande `div`, inte på kontrollen. `label htmlFor` och `#id` i tester hittar alltså inte fältet |
 
+## Mörkt läge
+
+KB byter läge med MUI:s `ThemeProvider`. sj-ui har ingen provider: färgerna följer `color-scheme` (tokens med `light-dark()`), och skuggor och tågbildernas dämpning följer systemet eller `data-color-scheme="dark"` på `<html>`. CSS kan inte läsa vilket läge som används, så en app som tvingar mörkt läge ska sätta båda: `document.documentElement.style.colorScheme = "dark"` och `document.documentElement.dataset.colorScheme = "dark"`, som Storybook gör. Sätter appen bara `color-scheme` blir färgerna rätt men tågbilderna odämpade.
+
 ## Token-drift
 
 `sj-button` 1.1.0 refererar tokens som `sj-global-styles` 3.1.0 saknar: `--sjse-color-fill-svart-8-procent` och `--sjse-color-background-base-secondary`. CSS:en har fallbacks. sj-global-styles läser också `--sjse-base-value` och `--sjse-font-family` utan att definiera dem (KB:s MUI-tema sätter dem i runtime), så `base.css` sätter `16` och `"sj_sans"`. Hover och pressed räknas med `--sjse-opacity-hovered/pressed` (0,08/0,12) som ett lager ovanpå färgen, inte med MUI:s `darken/lighten`, och kan skilja sig lite i mörkt läge.
