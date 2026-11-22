@@ -51,7 +51,7 @@ KB byter läge med MUI:s `ThemeProvider`. sj-ui har ingen provider: färgerna f�
 **Risker:**
 - Beta (0.1.0-beta.13) och tredjepartsberoende, samma invändning som RFC:n har mot Base UI. Lindring: låst version, kapsling (princip 4), Apache-2.0 tillåter fork.
 - Kräver React 19.
-- Skärmläsare: DatePicker läser som KB i VoiceOver/Safari. Select säger "text" i stället för "markerad" när listan öppnas (felsöks). TalkBack och NVDA är inte provade.
+- Skärmläsare: alla fem läser som KB i VoiceOver/Safari, utom de avsiktliga skillnaderna. TalkBack och NVDA är inte provade.
 - Fem av 192 komponenter. Nästlade komponenter (route-description, journey-summary, data-grid) är inte provade, och det var där Lovable-försöket gick sönder.
 
-**Nästa steg om teamet vill gå vidare:** rätta Selects VoiceOver-text, en nästlad komponent (journey-summary), paritet i högkontrast och forced colors, och TalkBack och NVDA.
+**Nästa steg om teamet vill gå vidare:** en nästlad komponent (journey-summary), paritet i högkontrast och forced colors, och TalkBack och NVDA.

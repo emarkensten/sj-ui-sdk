@@ -86,13 +86,9 @@ Molnmaskinen körde andra tester samtidigt, så de absoluta tiderna är högre �
 
 **Tangentbord:** flödena i KB (Tab, pilar, Enter, Escape, Home/End, sökning med bokstäver i Select, månad och år i DatePicker) fungerar likadant. Testat med Playwright, delvis i testsviten (`test/legacy-behaviour.test.tsx`).
 
-**VoiceOver i Safari** (Mac, november 2026):
+**VoiceOver i Safari** (Mac, november 2026): en automatiserad svit (`tools/a11y-harness`) läser varje story med VoiceOver i Safari och jämför med tillgänglighetsträdet i WebKit och Chromium, KB mot sj-ui. Full körning: 0 troliga fel och 14 av 19 stories lika i VoiceOver. De avvikelser som hittades är rättade efteråt (etiketten lästes två gånger i Select, "upptagen" på FlowButton med spinner, "tomt" i DatePickers celler och kortet lästes två gånger i DepartureCard med länk). De rättningarna är kontrollerade i tillgänglighetsträdet men inte körda med VoiceOver igen.
 
-- DatePicker: läser likadant som KB, fältet, kalendern och valet.
-- DepartureCard: kortets text för skärmläsare är KB:s ord för ord, med tågnummer och kommatecken. 46 av 49 varianter är identiska, de 3 andra är rättade fel i KB (se avsiktliga-skillnader.md). Jämfört i tillgänglighetsträdet, inte med VoiceOver.
-- Select: när listan öppnas säger VoiceOver "2 resenärer, text, 2 av 4" i sj-ui och "2 resenärer, markerad, 2 av 4" i KB. Tillgänglighetsträdet är detsamma. Felsökning pågår med en automatiserad VoiceOver-svit.
-
-FlowButton, Switch och DepartureCard är inte provade med VoiceOver än. Det gör den automatiserade sviten.
+Kvar, avsiktligt: DatePickers kalenderknapp läses med namn i sj-ui men utan namn i KB, DepartureCard utan pris säger inte "pris ,", och en inaktiv FlowButton läses som nedtonad. Se avsiktliga-skillnader.md.
 
 **Mörkt läge** ingår i paritetsmätningen ovan. Högkontrast och forced colors är inte mätta mot KB.
 

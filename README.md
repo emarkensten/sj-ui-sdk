@@ -14,7 +14,7 @@ Gå vidare med UI SDK för de komplexa komponenterna (Select, DatePicker, Dialog
 | Pixelidentiska jämförelser, ljust och mörkt, desktop och mobil | | 612 av 616 |
 | KB-props som fungerar oförändrade | | 295 av 295 |
 
-Kvar: Select läser "text" i stället för "markerad" i VoiceOver när listan öppnas, och nästlade komponenter är inte provade. Allt uppmätt står i [docs/matdata.md](docs/matdata.md), vad UI SDK gav i [docs/ui-sdk-rapport.md](docs/ui-sdk-rapport.md) och avsiktliga skillnader mot KB i [docs/avsiktliga-skillnader.md](docs/avsiktliga-skillnader.md).
+VoiceOver i Safari är provad med en automatiserad svit, utan kvarvarande fel. Kvar: nästlade komponenter, TalkBack och NVDA är inte provade. Allt uppmätt står i [docs/matdata.md](docs/matdata.md), vad UI SDK gav i [docs/ui-sdk-rapport.md](docs/ui-sdk-rapport.md) och avsiktliga skillnader mot KB i [docs/avsiktliga-skillnader.md](docs/avsiktliga-skillnader.md).
 
 Repot är privat. SJ:s tokens och ikoner ligger vendrade här och får inte publiceras som paket utan SJ:s beslut (`SEE LICENSE IN UNLICENSED`).
 

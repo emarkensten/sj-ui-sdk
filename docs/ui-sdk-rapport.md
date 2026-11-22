@@ -36,7 +36,7 @@ En grov uppskattning: utan UI SDK hade Select och DatePicker krävt 3 000–4 00
 
 - UI SDK är i beta (0.1.0-beta.13). Lindring: låst version, sj-ui kapslar UI SDK så att inget team importerar det direkt, och Apache-2.0 tillåter en fork.
 - Kräver React 19.
-- Select läser "text" i stället för "markerad" i VoiceOver när listan öppnas. Felsökning pågår. Vi vet inte än om felet sitter i UI SDK eller i sj-ui.
+- Skärmläsare är provade med VoiceOver i Safari. TalkBack och NVDA är inte provade.
 - Fem av KB:s 192 komponenter. Nästlade komponenter (journey-summary, route-description) är inte provade.
 
 ## Vad som tog tid, och hur nästa komponenter går snabbare
