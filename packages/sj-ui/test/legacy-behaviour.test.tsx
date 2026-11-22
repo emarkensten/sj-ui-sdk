@@ -6,6 +6,8 @@ import { Switch } from "../src/legacy/switch";
 import { FormControlLabel } from "../src/legacy/form-control-label";
 import { Select } from "../src/legacy/select";
 import { MenuItem } from "../src/legacy/menu-item";
+import { DatePicker, type DatePickerProps } from "../src/legacy/date-picker";
+import { useState } from "react";
 
 describe("FlowButton", () => {
   it("does not call onClick while the spinner shows, as in KB", () => {
@@ -142,5 +144,116 @@ describe("MenuItem on its own", () => {
     render(<ul><MenuItem href="/x">Länk</MenuItem><MenuItem variant="checkbox" selected>Val</MenuItem></ul>);
     expect(screen.getByRole("link").getAttribute("href")).toBe("/x");
     expect(screen.getByRole("menuitemcheckbox").getAttribute("aria-checked")).toBe("true");
+  });
+});
+
+describe("DatePicker", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-22T10:00:00Z"));
+  });
+  afterEach(() => vi.useRealTimers());
+
+  // The parent code KB's docs show: onChange keeps what is typed, onAccept a finished date.
+  function Picker({ initial = "2026-11-24", ...props }: Partial<DatePickerProps> & { initial?: string }) {
+    const [value, setValue] = useState(initial);
+    return (
+      <DatePicker
+        id="d"
+        label="Utresa"
+        value={value}
+        {...props}
+        onChange={(e) => {
+          setValue(e.target.value);
+          props.onChange?.(e);
+        }}
+        onAccept={(d) => {
+          setValue(d);
+          props.onAccept?.(d);
+        }}
+      />
+    );
+  }
+  const field = () => screen.getByLabelText("Utresa") as HTMLInputElement;
+
+  it("shows the date the SJ way, and ISO while the field has focus", () => {
+    render(<Picker />);
+    expect(field().value).toBe("Tisdag 24 november");
+    fireEvent.focus(field());
+    expect(field().value).toBe("2026-11-24");
+  });
+
+  it("says Idag and Imorgon, the year only when it isn't this year, and honours customTranslation", () => {
+    const { rerender } = render(<DatePicker id="d" label="Utresa" value="2026-11-22" />);
+    expect(field().value).toBe("Idag 22 november");
+    rerender(<DatePicker id="d" label="Utresa" value="2026-11-23" lang="en" />);
+    expect(field().value).toBe("Tomorrow, 23 November");
+    rerender(<DatePicker id="d" label="Utresa" value="2027-01-01" />);
+    expect(field().value).toBe("Fredag 1 januari 2027");
+    rerender(<DatePicker id="d" label="Utresa" value="2026-11-22" customTranslation={{ sv: { today: "I dag" } }} />);
+    expect(field().value).toBe("I dag 22 november");
+  });
+
+  it("masks typing as KB does and calls onChange for every keystroke", () => {
+    const seen: string[] = [];
+    render(<Picker initial="" onChange={(e) => seen.push(e.target.value)} />);
+    fireEvent.focus(field());
+    fireEvent.change(field(), { target: { value: "20261" } });
+    expect(field().value).toBe("2026-1");
+    fireEvent.change(field(), { target: { value: "2026-122" } });
+    expect(field().value).toBe("2026-12-2");
+    expect(seen).toEqual(["20261", "2026-122"]);
+    expect(field().maxLength).toBe(10);
+  });
+
+  it("accepts a finished date on Enter and on blur, adding a zero to a one-digit day", () => {
+    const onAccept = vi.fn();
+    render(<Picker initial="" onAccept={onAccept} />);
+    fireEvent.focus(field());
+    fireEvent.change(field(), { target: { value: "2026-12-24" } });
+    fireEvent.keyDown(field(), { key: "Enter" });
+    expect(onAccept).toHaveBeenLastCalledWith("2026-12-24");
+    fireEvent.change(field(), { target: { value: "2026-12-5" } });
+    fireEvent.blur(field());
+    expect(onAccept).toHaveBeenLastCalledWith("2026-12-05");
+    expect(field().value).toBe("Lördag 5 december");
+  });
+
+  it("does not accept a date that doesn't exist", () => {
+    const onAccept = vi.fn();
+    render(<Picker initial="" onAccept={onAccept} />);
+    fireEvent.focus(field());
+    fireEvent.change(field(), { target: { value: "2026-02-30" } });
+    fireEvent.blur(field());
+    expect(onAccept).not.toHaveBeenCalled();
+    expect(field().value).toBe("2026-02-30");
+  });
+
+  it("names the calendar button as KB, with the journey direction", () => {
+    const { rerender } = render(<DatePicker id="d" label="Utresa" value="2026-11-24" journeyDirection="outward" />);
+    expect(screen.getByRole("button").getAttribute("aria-label")).toBe("Utresa, Valt datum tisdag 24 november 2026, Tryck för att öppna kalendern ");
+    rerender(<DatePicker id="d" label="Utresa" value="" />);
+    expect(screen.getByRole("button").getAttribute("aria-label")).toBe("Tryck för att öppna kalendern ");
+    expect(screen.getByRole("button").getAttribute("aria-haspopup")).toBe("dialog");
+  });
+
+  it("formats with displayFormat and passes customAttribute on as KB's test ids", () => {
+    render(<DatePicker id="d" label="Utresa" value="2026-11-24" displayFormat="dd/MM/yyyy" customAttribute={{ attribute: "data-testid", value: "date" }} />);
+    expect(field().value).toBe("24/11/2026");
+    expect(field().getAttribute("data-testid")).toBe("date-Input");
+    expect(screen.getByRole("button").getAttribute("data-testid")).toBe("date-CalendarButton");
+  });
+
+  it("sets aria-required unless required is false, and shows errorHelperText as an error", () => {
+    const { rerender } = render(<DatePicker id="d" label="Utresa" value="" errorHelperText="Välj ett datum" />);
+    expect(field().getAttribute("aria-required")).toBe("true");
+    expect(screen.getByText("Välj ett datum")).toBeTruthy();
+    rerender(<DatePicker id="d" label="Utresa" value="" required={false} />);
+    expect(field().getAttribute("aria-required")).toBe("false");
+  });
+
+  it("accepts the TextField props KB's types allow, which KB ignores", () => {
+    render(<DatePicker id="d" label="Utresa" value="" name="out" onFocus={() => {}} inputProps={{}} variant="outlined" />);
+    expect(field()).toBeTruthy();
   });
 });

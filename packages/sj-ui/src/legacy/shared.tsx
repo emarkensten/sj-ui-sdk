@@ -9,6 +9,12 @@ import { warnOnce } from "../lib/warn";
 
 export type CustomAttribute = { attribute: string; value: string | number };
 
+/** KB's borderRadiusOverride names, mapped to the radius tokens a field uses. */
+export type KbRadius = "capsule" | "circle" | "default" | "large" | "lg" | "md" | "medium" | "sm" | "small" | "xl";
+export const kbRadii: Record<KbRadius, string> = {
+  capsule: "capsule", circle: "capsule", default: "xl", large: "lg", lg: "lg", md: "md", medium: "md", sm: "sm", small: "sm", xl: "xl",
+};
+
 /** KB's test-id contract: `customAttribute` becomes an attribute on the root, sub-parts get "-Name" suffixes. */
 export function customAttr(ca: CustomAttribute | undefined, suffix?: string): Record<string, string> {
   if (!ca) return {};

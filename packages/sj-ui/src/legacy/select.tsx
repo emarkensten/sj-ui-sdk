@@ -16,13 +16,12 @@ import { Cancel, ChevronDown } from "../icons";
 import { cx } from "../lib/cx";
 import { kbMobileQuery, useMedia } from "../lib/use-media";
 import { MenuItem, MenuItemLayout, type MenuItemProps } from "./menu-item";
-import { customAttr, legacyMarker, useLegacySx, type CustomAttribute, type LegacySx } from "./shared";
+import { customAttr, kbRadii, legacyMarker, useLegacySx, type CustomAttribute, type KbRadius, type LegacySx } from "./shared";
 
 /** MUI's SelectChangeEvent: what onChange reads is `event.target.value` and `event.target.name`. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MUI types the value as any
 export type SelectChangeEvent<T = any> = Event & { target: { value: T; name: string } };
 type Density = "comfortable" | "compact" | "dense" | "tight";
-type KbRadius = "capsule" | "circle" | "default" | "large" | "lg" | "md" | "medium" | "sm" | "small" | "xl";
 
 type InputEvents = "onFocus" | "onBlur" | "onInvalid" | "onKeyDown" | "onKeyUp";
 
@@ -110,9 +109,6 @@ export interface SelectProps extends Omit<HTMLAttributes<HTMLDivElement>, "onCha
   renderSuffix?: unknown;
 }
 
-const radii: Record<KbRadius, string> = {
-  capsule: "capsule", circle: "capsule", default: "xl", large: "lg", lg: "lg", md: "md", medium: "md", sm: "sm", small: "sm", xl: "xl",
-};
 const closeLabel = { sv: "Stäng", en: "Close" };
 
 /** MUI's areEqualValues: objects by identity, everything else by its string. */
@@ -201,7 +197,7 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
     return (
       <span {...legacyMarker} className="sj-legacy-select-skeleton" data-external-label={hasExternalLabel || undefined} data-full-width={fullWidth || undefined}>
         {hasExternalLabel && <span className="sj-legacy-select-skeleton__label" />}
-        <span className="sj-legacy-select-skeleton__box" data-density={density} data-rounded={rounded || undefined} data-radius={borderRadiusOverride && radii[borderRadiusOverride]}>
+        <span className="sj-legacy-select-skeleton__box" data-density={density} data-rounded={rounded || undefined} data-radius={borderRadiusOverride && kbRadii[borderRadiusOverride]}>
           <span className="sj-legacy-select-skeleton__bar" />
           <ChevronDown />
         </span>
@@ -240,7 +236,7 @@ export const Select = forwardRef(function Select(props: SelectProps, ref: Ref<HT
       fullWidth={fullWidth}
       start={start}
       end={endAdornment}
-      rootProps={{ "data-legacy-select": "", "data-density": density, "data-rounded": rounded ? "" : undefined, "data-radius": borderRadiusOverride && radii[borderRadiusOverride] }}
+      rootProps={{ "data-legacy-select": "", "data-density": density, "data-rounded": rounded ? "" : undefined, "data-radius": borderRadiusOverride && kbRadii[borderRadiusOverride] }}
     >
       {native ? (
         <select
