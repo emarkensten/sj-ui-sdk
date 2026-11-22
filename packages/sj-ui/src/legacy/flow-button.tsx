@@ -129,6 +129,8 @@ export const FlowButton = forwardRef(function FlowButton(props: FlowButtonProps,
       showSpinner={shouldShowSpinner}
       fullWidth={fullWidth}
       disabled={disabled}
+      // MUI's ButtonBase always sets tabindex, and Safari only tabs to buttons that have one.
+      tabIndex={rest.tabIndex ?? (disabled ? -1 : 0)}
       onClick={onClick && !shouldShowSpinner ? (event) => onClick(event as Parameters<MouseEventHandler<HTMLButtonElement>>[0]) : undefined}
       className={cx(resolved.className, className)}
       style={{ ...resolved.style, ...style }}

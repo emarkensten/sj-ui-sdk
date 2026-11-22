@@ -336,6 +336,7 @@ export const DatePicker = forwardRef(function DatePicker(props: DatePickerProps,
               ref={setButtonRef}
               className="sj-legacy-date__button"
               data-focus-ring=""
+              tabIndex={0}
               aria-haspopup="dialog"
               aria-expanded={open}
               aria-label={buttonLabel}
