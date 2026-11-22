@@ -155,3 +155,8 @@
     &[data-outside] { visibility: hidden; }
   }
 }
+
+@layer sj-components {
+  /* KB's DateField label keeps MUI's own line height (1.4375em), Select's uses the body token. */
+  .sj-field:has(.sj-date-picker__input) .sj-field__label { line-height: 1.4375em; }
+}

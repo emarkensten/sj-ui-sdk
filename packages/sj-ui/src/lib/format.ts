@@ -8,13 +8,22 @@ export function formatTime(date: Date, timeZone = STOCKHOLM) {
   return new Intl.DateTimeFormat("sv-SE", { hour: "2-digit", minute: "2-digit", timeZone }).format(date);
 }
 
-/** "Tisdag 24 november", the format SJ's DatePicker shows by default. */
-export function formatLongDate(iso: string, lang?: string) {
+/**
+ * The text SJ's DatePicker shows: "Tisdag 24 november", "Idag 22 november", "Tomorrow, 23 November",
+ * with the year only when it isn't this year. Same rules as KB's createCustomDatePickerFormat.
+ */
+export function formatLongDate(iso: string, lang?: string, timeZone = STOCKHOLM) {
   const [y, m, d] = iso.split("-").map(Number);
   if (!y || !m || !d) return iso;
-  const text = new Intl.DateTimeFormat(locales[resolveLang(lang)], { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(
-    new Date(Date.UTC(y, m - 1, d)),
-  );
+  const l = resolveLang(lang);
+  const copy = t(l);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(locales[l], { ...o, timeZone: "UTC" }).format(date);
+  const todayIso = new Intl.DateTimeFormat("sv-SE", { timeZone }).format(new Date());
+  const [ty, tm, td] = todayIso.split("-").map(Number);
+  const dayDiff = Math.round((date.getTime() - Date.UTC(ty, tm - 1, td)) / 86400000);
+  const day = dayDiff === 0 ? copy.today : dayDiff === 1 ? copy.tomorrow : fmt({ weekday: "long" });
+  const text = `${day}${copy.daySeparator} ${fmt({ day: "numeric", month: "long" })}${y !== ty ? ` ${y}` : ""}`;
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 

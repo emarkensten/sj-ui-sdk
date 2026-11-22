@@ -32,6 +32,9 @@ const dictionaries = {
     days: "d",
     currency: ":-",
     nextDay: "nästa dag",
+    today: "Idag",
+    tomorrow: "Imorgon",
+    daySeparator: "",
   },
   en: {
     chooseDate: "Choose date",
@@ -58,6 +61,9 @@ const dictionaries = {
     days: "d",
     currency: " SEK",
     nextDay: "next day",
+    today: "Today",
+    tomorrow: "Tomorrow",
+    daySeparator: ",",
   },
 };
 

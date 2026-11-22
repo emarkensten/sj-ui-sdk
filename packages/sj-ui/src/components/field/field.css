@@ -86,13 +86,15 @@
 
   .sj-field:is(:focus-within, :has([data-open])):not([data-invalid]) .sj-field__label { color: var(--sjse-color-border-focused); }
 
+  /* External label: KB's hasExternalLabel, body text above the field with 16 px between. */
   .sj-field[data-external-label] {
+    row-gap: var(--sjse-spacing-default);
     & .sj-field__label {
       position: static;
-      transform: none;
+      transform: none !important;
       max-width: none;
-      font: var(--sjse-typography-subheadline);
-      color: var(--sjse-color-text-primary);
+      font: var(--sjse-typography-body);
+      color: var(--sjse-color-text-primary) !important;
     }
     & .sj-field__outline { inset: 0; }
     & .sj-field__outline legend { display: none; }

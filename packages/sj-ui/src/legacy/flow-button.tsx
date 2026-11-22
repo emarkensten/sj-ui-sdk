@@ -116,6 +116,7 @@ export const FlowButton = forwardRef(function FlowButton(props: FlowButtonProps,
       className={cx(resolved.className, className)}
       style={{ ...resolved.style, ...style }}
       data-legacy-color={mapped.legacy}
+      data-legacy-flow=""
       render={href ? <Link href={href} /> : undefined}
     >
       {children}

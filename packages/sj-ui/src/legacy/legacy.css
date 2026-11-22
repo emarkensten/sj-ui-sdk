@@ -20,6 +20,10 @@
 
   a.sj-button { text-decoration: none; }
 
+  /* FlowButton: 12 px between symbol and text at every size (4 px above text), symbol at its own size. */
+  .sj-button[data-legacy-flow] .sj-button__label { --sj-button-gap: var(--sjse-spacing-x1_5) !important; --sj-button-symbol-size: auto !important; }
+  .sj-button[data-legacy-flow][data-icon-position="top"] .sj-button__label { --sj-button-gap: var(--sjse-spacing-x0_5) !important; }
+
   /* isLoading skeletons */
   .sj-legacy-skeleton {
     display: inline-block;
