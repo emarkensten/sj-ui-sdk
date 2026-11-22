@@ -68,7 +68,7 @@ export function Button({
       data-full-width={fullWidth || undefined}
       data-spinner={showSpinner || undefined}
       data-selected={selected || undefined}
-      aria-busy={showSpinner || undefined}
+      aria-busy={"aria-busy" in rest ? rest["aria-busy"] : showSpinner || undefined}
     >
       <span className="sj-button__label" data-has-symbol={hasSymbol || undefined}>
         {hasSymbol && (

@@ -127,6 +127,8 @@ export const FlowButton = forwardRef(function FlowButton(props: FlowButtonProps,
       icon={symbol}
       iconPosition={symbolPosition}
       showSpinner={shouldShowSpinner}
+      // KB does not mark the spinning button busy; VoiceOver would add "upptagen".
+      aria-busy={rest["aria-busy"]}
       fullWidth={fullWidth}
       disabled={disabled}
       // MUI's ButtonBase always sets tabindex, and Safari only tabs to buttons that have one.
