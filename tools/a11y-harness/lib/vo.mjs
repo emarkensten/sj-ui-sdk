@@ -71,6 +71,13 @@ const SAFARI_UI = /verktygsfält|toolbar|avdelare|splitter|flikfält|tab bar|adr
  * Returns false if it never got there.
  */
 async function enterPage(voiceOver, macOSActivate, url) {
+  // Right after VoiceOver starts it sometimes misses the first page (the first story failed once in
+  // a full run): load the page again once before giving up.
+  for (let attempt = 0; attempt < 2; attempt++) if (await enterPageOnce(voiceOver, macOSActivate, url)) return true;
+  return false;
+}
+
+async function enterPageOnce(voiceOver, macOSActivate, url) {
   safari(url);
   await sleep(2500);
   await macOSActivate("Safari");
@@ -98,6 +105,10 @@ async function enterPage(voiceOver, macOSActivate, url) {
 
 /** Move the VoiceOver cursor onto the first thing in the page that says something. */
 async function firstItem(voiceOver) {
+  // After interacting with the web area VoiceOver sometimes already stands on the first item; with a
+  // single-item page another VO-Right then only hits the end of the page.
+  const here = tidy(await voiceOver.itemText().catch(() => ""));
+  if (here && !WEB_AREA.test(here) && !SAFARI_UI.test(here)) return here;
   for (let i = 0; i < 4; i++) {
     await voiceOver.next();
     const phrase = tidy(await voiceOver.lastSpokenPhrase());
