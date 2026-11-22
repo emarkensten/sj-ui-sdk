@@ -65,23 +65,37 @@ const SAFARI_UI = /verktygsfält|toolbar|avdelare|splitter|flikfält|tab bar|adr
  * reaches the web content, then interact with it (VO-Shift-Down). Returns false if it never got there.
  */
 async function enterPage(voiceOver, macOSActivate, url) {
-  // Leave the previous page first: after interact() VoiceOver stays inside the old web area, and
-  // would never announce "webbinnehåll" for the new one.
-  for (let i = 0; i < 3; i++) await voiceOver.stopInteracting().catch(() => {});
   safari(url);
   await sleep(2500);
   await macOSActivate("Safari");
   await sleep(300);
-  for (let i = 0; i < 12; i++) {
+  // The story puts keyboard focus just before the component (see preview.tsx). Move the VoiceOver
+  // cursor there: that lands inside the page whatever Safari's toolbar holds (extensions and so on).
+  await voiceOver.perform(voiceOver.keyboardCommands.moveCursorToKeyboardFocus).catch(() => {});
+  await sleep(300);
+  const here = tidy(await voiceOver.lastSpokenPhrase());
+  if (!SAFARI_UI.test(here) && !/menyknapp|menu button|flik|tab\b/i.test(here)) return true;
+  // Fallback: step through Safari's interface to the web content and interact with it.
+  for (let i = 0; i < 60; i++) {
+    await voiceOver.next();
     const phrase = tidy(await voiceOver.lastSpokenPhrase());
     if (WEB_AREA.test(phrase)) {
       await voiceOver.interact();
       await sleep(400);
       return true;
     }
-    await voiceOver.next();
   }
   return false;
+}
+
+/** Move the VoiceOver cursor onto the first thing in the page that says something. */
+async function firstItem(voiceOver) {
+  for (let i = 0; i < 4; i++) {
+    await voiceOver.next();
+    const phrase = tidy(await voiceOver.lastSpokenPhrase());
+    if (phrase && !WEB_AREA.test(phrase) && !SAFARI_UI.test(phrase)) return phrase;
+  }
+  return "";
 }
 
 export async function runVoiceOver({ base, targets, log = console.log }) {
@@ -104,6 +118,7 @@ export async function runVoiceOver({ base, targets, log = console.log }) {
             await voiceOver.next();
             const phrase = tidy(await voiceOver.lastSpokenPhrase());
             if (!phrase) continue;
+            if (WEB_AREA.test(phrase)) continue;
             if (phrase === entry.read.at(-1) || SAFARI_UI.test(phrase)) {
               if (++same >= 2) break; // End of the page: VoiceOver repeats the last item.
               continue;
@@ -114,6 +129,7 @@ export async function runVoiceOver({ base, targets, log = console.log }) {
           if (!entry.read.length) throw new Error("VoiceOver läste ingenting inne på sidan.");
           // 2. Fresh page, then the keyboard flow: everything VoiceOver says after each key.
           if (!(await enterPage(voiceOver, macOSActivate, url))) throw new Error("VoiceOver nådde inte sidans innehåll inför tangentbordsflödet.");
+          if (!(await firstItem(voiceOver))) throw new Error("VoiceOver hittade ingen komponent att trycka på.");
           for (const key of t.keys) {
             await voiceOver.clearSpokenPhraseLog();
             // "VO:next" moves the VoiceOver cursor (VO-Right), "VO:act" activates the item under it
