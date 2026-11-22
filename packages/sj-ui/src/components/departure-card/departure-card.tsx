@@ -1,4 +1,4 @@
-import type { AnchorHTMLAttributes, ReactNode } from "react";
+import type { AnchorHTMLAttributes, ElementType, ReactNode } from "react";
 import { useId } from "react";
 import { Button as UiButton } from "@ui-sdk/react/button";
 import {
@@ -115,7 +115,7 @@ export interface DepartureCardProps {
    */
   size?: "small" | "medium" | "large";
   /** Corner radius token. Default "default" (16 px). */
-  radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "default";
+  radius?: "none" | "sm" | "md" | "lg" | "xl" | "capsule" | "default";
   /** Pull the vehicle pictures to the card's edge (default) or keep them in line with the text. */
   alignVehiclesWithText?: boolean;
   lang?: Lang;
@@ -125,6 +125,8 @@ export interface DepartureCardProps {
   className?: string;
   /** Non-interactive content inside the click area, under the card's own content. */
   footer?: ReactNode;
+  /** Element for the times, like "h3". The times are hidden from screen readers, so this only changes the tag. */
+  timeAs?: ElementType;
   /** Rendered after the button, outside the click area, like an accordion with the stops. */
   children?: ReactNode;
   id?: string;
@@ -206,6 +208,7 @@ export function DepartureCard({
   timeZone = "Europe/Stockholm",
   className,
   footer,
+  timeAs: Time = "span",
   children,
   ...rest
 }: DepartureCardProps) {
@@ -311,10 +314,10 @@ export function DepartureCard({
       )}
       <span className="sj-departure-card__row">
         <span className="sj-departure-card__main">
-          <span aria-hidden="true" className="sj-departure-card__time sj-departure-card__dim">
+          <Time aria-hidden="true" className="sj-departure-card__time sj-departure-card__dim">
             <span>{`${depTime}${copy.separator}`}</span>
             <span>{arrTime}</span>
-          </span>
+          </Time>
           <span aria-hidden={durationLink ? undefined : true} className="sj-departure-card__duration sj-departure-card__dim">
             {durationLink ? <DurationLink {...durationLink} describedBy={`${uid}-desc`} label={durationText} /> : durationText}
           </span>

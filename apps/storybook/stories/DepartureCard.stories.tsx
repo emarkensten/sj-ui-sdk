@@ -153,3 +153,7 @@ export const LitenSlutsald = v("Storlek small, slutsåld", { size: "small", avai
 export const Stor = v("Storlek large", { size: "large" });
 export const Avrundning = v("Mindre avrundning", { borderRadiusOverride: "sm" } as Args);
 export const JusteraVanster = v("Bilden i linje med texten", { adjustLeft: true });
+export const AvrundningAldre = v("Avrundning med äldre namn", { borderRadiusOverride: "large" } as Args);
+export const AvrundningKapsel = v("Avrundning capsule", { borderRadiusOverride: "capsule", size: "small" } as Args);
+export const TidSomRubrik = v("Tiden som h3", { timeLabelTypographyElement: "h3" });
+export const ArvdaPropsUtanEffekt = v("Ärvda props utan effekt", { isLoading: true, showTransportImage: false, applyGradient: true, hasMarginTop: false, elevation: 3 } as Args);

@@ -77,11 +77,11 @@
   }
 
   .sj-departure-card[data-radius="none"] { border-radius: 0; }
-  .sj-departure-card[data-radius="xs"] { border-radius: var(--sjse-border-radius-xs); }
   .sj-departure-card[data-radius="sm"] { border-radius: var(--sjse-border-radius-sm); }
   .sj-departure-card[data-radius="md"] { border-radius: var(--sjse-border-radius-md); }
   .sj-departure-card[data-radius="lg"] { border-radius: var(--sjse-border-radius-lg); }
   .sj-departure-card[data-radius="xl"] { border-radius: var(--sjse-border-radius-xl); }
+  .sj-departure-card[data-radius="capsule"] { border-radius: var(--sjse-border-radius-capsule); }
 
   .sj-departure-card__caption {
     display: flex;
@@ -107,6 +107,7 @@
 
   .sj-departure-card__time {
     display: flex;
+    margin: 0;
     hyphens: manual;
     flex-wrap: wrap;
     padding-block: 0.25rem;

@@ -5,7 +5,7 @@
  * Deliberate difference: `disabled` stops clicks. In KB it never reached the CardActionArea,
  * so a disabled card could still be chosen. Unavailable departures stay clickable, as in KB.
  */
-import type { ReactNode } from "react";
+import type { ElementType, ReactNode } from "react";
 import {
   DepartureCard as NewDepartureCard,
   type Amenity,
@@ -29,7 +29,12 @@ type TransportationType = {
   transportMethodDescription?: string;
 };
 type ComfortAvailability = { category: ComfortCategory; isAvailable: boolean; soldOut: boolean };
-type LinkProps = { href?: string; onClick?: () => void; component?: unknown; [key: string]: unknown };
+/** KB's LinkProps plus what MUI's Link takes; the duration link renders as `<a>` or `<button>`. */
+type LinkProps = { href?: string; rel?: string; target?: string; reloadDocument?: boolean; to?: unknown; onClick?: (event: never) => void; component?: unknown; sx?: unknown; "aria-describedby"?: string };
+type KbRadius = "capsule" | "circle" | "default" | "large" | "lg" | "md" | "medium" | "sm" | "small" | "xl";
+const radii: Record<KbRadius, NonNullable<Parameters<typeof NewDepartureCard>[0]["radius"]>> = {
+  capsule: "capsule", circle: "capsule", default: "default", large: "lg", lg: "lg", md: "md", medium: "md", sm: "sm", small: "sm", xl: "xl",
+};
 
 export interface DepartureCardProps {
   departureDate: Date;
@@ -65,9 +70,10 @@ export interface DepartureCardProps {
   badgeColor?: BadgeColor;
   durationLink?: LinkProps;
   size?: "small" | "medium" | "large";
-  borderRadiusOverride?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "default";
+  borderRadiusOverride?: KbRadius;
   adjustLeft?: boolean;
-  translation?: Record<string, string>;
+  /** KB's DepartureCardTranslations: a flat object of texts. */
+  translation?: object;
   timeZone?: string;
   lang?: string;
   className?: string;
@@ -76,18 +82,33 @@ export interface DepartureCardProps {
   limitClickArea?: boolean;
   limitedClickAreaSlot?: ReactNode;
   children?: ReactNode;
-  CardActionAreaProps?: Record<string, unknown>;
-  ClickableCardProps?: Record<string, unknown>;
+  /** Props for the clickable area (the card's button). */
+  CardActionAreaProps?: object;
+  /** Props for the card's root. */
+  ClickableCardProps?: object;
   /** Renders the time in this element. KB hides it from screen readers, so it only changes the tag. */
-  timeLabelTypographyElement?: string;
+  timeLabelTypographyElement?: ElementType;
   /** KB's card has no shadow at any elevation, so this has no visible effect there either. */
   elevation?: number;
-  [key: string]: unknown;
+  /*
+   * KB's types inherit these from TransportDetails and Card, but DepartureCard never reads them,
+   * so they have no effect in KB either.
+   */
+  sx?: unknown;
+  isLoading?: boolean;
+  placements?: unknown;
+  showTransportImage?: boolean;
+  dynamicTrainSize?: boolean;
+  applyGradient?: boolean;
+  hasMarginTop?: boolean;
+  hasMarginBottom?: boolean;
+  transportStatus?: unknown;
 }
 
 /** KB's flat translation object, mapped onto the new component's texts. */
-function toText(tr: Record<string, string> | undefined): Partial<DepartureCardText> | undefined {
-  if (!tr) return undefined;
+function toText(translation: object | undefined): Partial<DepartureCardText> | undefined {
+  if (!translation) return undefined;
+  const tr = translation as Record<string, string>;
   const pick = <K extends string>(keys: readonly K[]) =>
     Object.fromEntries(keys.filter((k) => tr[k] !== undefined).map((k) => [k, tr[k]])) as Record<K, string>;
   const out: Partial<DepartureCardText> = {};
@@ -158,6 +179,7 @@ export function DepartureCard(props: DepartureCardProps) {
     children,
     CardActionAreaProps,
     ClickableCardProps,
+    timeLabelTypographyElement,
   } = props;
 
   const { component: _component, ...link } = durationLink ?? {};
@@ -193,13 +215,14 @@ export function DepartureCard(props: DepartureCardProps) {
       badge={badgeLabel && badgeColor ? { label: badgeLabel, color: badgeColor } : undefined}
       durationLink={durationLink ? (link as NonNullable<Parameters<typeof NewDepartureCard>[0]["durationLink"]>) : undefined}
       size={size}
-      radius={borderRadiusOverride}
+      radius={borderRadiusOverride && radii[borderRadiusOverride]}
       alignVehiclesWithText={adjustLeft}
       lang={resolveLang(lang)}
       text={toText(translation)}
       timeZone={timeZone}
-      buttonProps={CardActionAreaProps}
+      buttonProps={CardActionAreaProps as Record<string, unknown>}
       footer={limitClickArea ? limitedClickAreaSlot : children}
+      timeAs={timeLabelTypographyElement}
     >
       {limitClickArea ? children : null}
     </NewDepartureCard>
