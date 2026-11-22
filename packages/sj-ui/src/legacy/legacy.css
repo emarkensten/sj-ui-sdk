@@ -345,6 +345,15 @@
     & .sj-field__box { min-height: 0; height: calc(2 * var(--sj-legacy-pad) + 1.5rem); padding-right: var(--sjse-spacing-x1); }
     & .sj-field__end { padding: 0 0 0 var(--sjse-spacing-x0_5); }
     &[data-disabled] .sj-legacy-date__input { -webkit-text-fill-color: currentColor; }
+    /* KB's open calendar takes focus and lays an invisible backdrop over the page: the field
+       keeps its resting look and nothing under the pointer shows hover. */
+    &:has([data-open]):not(:focus-within) {
+      & .sj-field__outline { border-width: 1px; }
+      &:not([data-invalid]) .sj-field__outline { border-color: var(--sjse-color-border-input) !important; }
+      &:not([data-filled]) .sj-field__outline legend { max-width: 0.01px; }
+      &:not([data-invalid]) .sj-field__label { color: var(--sjse-color-text-secondary); }
+      & .sj-field__box, & .sj-legacy-date__button { background: none !important; }
+    }
   }
 
   /* The popover's anchor: the whole box, as KB anchors on the outline. */
