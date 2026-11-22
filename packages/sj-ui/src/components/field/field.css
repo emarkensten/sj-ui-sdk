@@ -1,0 +1,129 @@
+/*
+ * Outlined field, measured from SJ's MUI TextField/Select: 56px, radius 16px,
+ * 1px border rgba(0,0,0,.42), label notched into the border at 12px when filled or focused.
+ */
+@layer sj-components {
+  .sj-field {
+    position: relative;
+    display: inline-grid;
+    gap: var(--sjse-spacing-x0_5);
+    min-width: 12rem;
+    font: var(--sjse-typography-body);
+    color: var(--sjse-color-text-primary);
+
+    &[data-full-width] { display: grid; width: 100%; }
+  }
+
+  .sj-field__box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 3.5rem;
+    border-radius: var(--sjse-border-radius-lg, 1rem);
+    background: var(--sjse-color-background-primary-level-1, transparent);
+  }
+
+  .sj-field__outline {
+    position: absolute;
+    inset: -5px 0 0;
+    margin: 0;
+    padding: 0 0.5rem;
+    pointer-events: none;
+    border: 1px solid var(--sjse-color-border-input, rgb(0 0 0 / 42%));
+    border-radius: inherit;
+    min-width: 0;
+    transition: border-color 0.15s;
+
+    & legend {
+      float: unset;
+      width: auto;
+      max-width: 0.01px;
+      height: 11px;
+      padding: 0;
+      font: var(--sjse-typography-caption-1);
+      visibility: hidden;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: max-width 50ms;
+
+      & > span { display: inline-block; padding: 0 5px; }
+    }
+  }
+
+  .sj-field__box:hover .sj-field__outline { border-color: var(--sjse-color-text-primary); }
+
+  /* The label: inside the box when empty, notched into the border when filled or focused. */
+  .sj-field__label {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    max-width: calc(100% - 3rem);
+    transform: translate(1rem, 1rem);
+    transform-origin: top left;
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--sjse-color-text-secondary);
+    transition: transform 0.15s var(--sjse-easing-glide, ease), font 0.15s;
+
+    .sj-field[data-has-start] & { transform: translate(3rem, 1rem); }
+  }
+
+  .sj-field:is([data-filled], :focus-within, :has([data-open])) {
+    & .sj-field__label {
+      transform: translate(0.875rem, -0.5rem);
+      font: var(--sjse-typography-caption-1);
+      color: var(--sjse-color-text-secondary);
+    }
+    & .sj-field__outline legend { max-width: 100%; transition: max-width 100ms 50ms; }
+  }
+
+  .sj-field[data-external-label] {
+    & .sj-field__label {
+      position: static;
+      transform: none;
+      max-width: none;
+      font: var(--sjse-typography-subheadline);
+      color: var(--sjse-color-text-primary);
+    }
+    & .sj-field__outline { inset: 0; }
+    & .sj-field__outline legend { display: none; }
+  }
+
+  .sj-field:focus-within .sj-field__outline,
+  .sj-field:has([data-open]) .sj-field__outline {
+    border-width: 2px;
+    border-color: var(--sjse-color-border-focused, var(--sjse-color-text-primary));
+  }
+
+  .sj-field[data-invalid] {
+    & .sj-field__outline { border-color: var(--sjse-color-border-error); }
+    & .sj-field__label { color: var(--sjse-color-text-error); }
+  }
+
+  .sj-field[data-disabled] {
+    opacity: var(--sjse-opacity-disabled, 0.48);
+    & .sj-field__box:hover .sj-field__outline { border-color: var(--sjse-color-border-input, rgb(0 0 0 / 42%)); }
+  }
+
+  .sj-field__start,
+  .sj-field__end {
+    display: grid;
+    place-items: center;
+    flex: none;
+    color: var(--sjse-color-text-primary);
+    & svg { width: 1.5rem; height: 1.5rem; }
+  }
+  .sj-field__start { padding-left: 1rem; }
+  .sj-field__end { padding-right: 0.5rem; }
+
+  .sj-field__helper {
+    padding-inline: 1rem;
+    font: var(--sjse-typography-footnote);
+    color: var(--sjse-color-text-secondary);
+
+    .sj-field[data-invalid] & { color: var(--sjse-color-text-error); }
+  }
+}

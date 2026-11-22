@@ -1,0 +1,85 @@
+/* DepartureCard, measured from SJ's: white, radius 16, 1px border, padding 16, times 26px bold. */
+@layer sj-components {
+  .sj-departure-card {
+    position: relative;
+    box-sizing: border-box;
+    border: 1px solid var(--sjse-color-border-divider, rgb(0 0 0 / 12%));
+    border-radius: var(--sjse-border-radius-lg, 1rem);
+    background: var(--sjse-color-background-primary-level-1, var(--sjse-color-background-primary, #fff));
+    color: var(--sjse-color-text-primary);
+    overflow: clip;
+
+    &[data-selected] {
+      border-color: var(--sjse-color-border-selected, var(--sjse-color-fill-lov-1));
+      box-shadow: inset 0 0 0 1px var(--sjse-color-border-selected, var(--sjse-color-fill-lov-1));
+    }
+  }
+
+  .sj-departure-card__button {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    gap: var(--sjse-spacing-x0_5);
+    width: 100%;
+    padding: var(--sjse-spacing-default);
+    cursor: pointer;
+    text-align: start;
+    font: var(--sjse-typography-body);
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover:not([data-disabled]) { background: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-hovered, 0.04)); }
+    &:active:not([data-disabled]) { background: rgb(from var(--sjse-color-text-primary) r g b / var(--sjse-opacity-pressed, 0.08)); }
+    &:focus-visible { outline: 2px solid var(--sjse-color-border-focused, currentColor); outline-offset: -3px; border-radius: inherit; }
+    &[data-disabled] { cursor: not-allowed; }
+  }
+
+  .sj-departure-card[data-availability]:not([data-availability="available"]) .sj-departure-card__button > * {
+    opacity: 0.6;
+  }
+
+  .sj-departure-card__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sjse-spacing-default);
+  }
+
+  .sj-departure-card__time {
+    margin: 0;
+    font: var(--sjse-typography-title-1-emphasized);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sj-departure-card__price {
+    flex: none;
+    white-space: nowrap;
+  }
+  .sj-departure-card__price-prefix { font: var(--sjse-typography-subheadline); }
+  .sj-departure-card__price-value { font: var(--sjse-typography-title-1-emphasized); }
+
+  .sj-departure-card__status {
+    flex: none;
+    font: var(--sjse-typography-headline);
+  }
+
+  .sj-departure-card__desc { display: grid; gap: var(--sjse-spacing-x1); }
+
+  .sj-departure-card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--sjse-spacing-x1_5);
+    min-height: 2rem;
+    & svg { width: 1.25rem; height: 1.25rem; }
+    & .sj-departure-card__train { width: 2rem; height: 2rem; color: var(--sjse-color-text-secondary); }
+  }
+
+  .sj-departure-card__trains { font: var(--sjse-typography-subheadline); }
+
+  .sj-departure-card__caption {
+    display: flex;
+    align-items: center;
+    gap: var(--sjse-spacing-x0_5);
+    font: var(--sjse-typography-subheadline);
+  }
+}

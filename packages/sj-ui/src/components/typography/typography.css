@@ -1,0 +1,32 @@
+/* Typography: one CSS rule per SJ token. No runtime styling. */
+@layer sj-components {
+  .sj-typography {
+    margin: 0;
+    color: inherit;
+    text-wrap: pretty;
+    &[data-variant="large-title"] { font: var(--sjse-typography-large-title); }
+    &[data-variant="large-title-emphasized"] { font: var(--sjse-typography-large-title-emphasized); }
+    &[data-variant="title-1"] { font: var(--sjse-typography-title-1); }
+    &[data-variant="title-1-emphasized"] { font: var(--sjse-typography-title-1-emphasized); }
+    &[data-variant="title-2"] { font: var(--sjse-typography-title-2); }
+    &[data-variant="title-2-emphasized"] { font: var(--sjse-typography-title-2-emphasized); }
+    &[data-variant="title-3"] { font: var(--sjse-typography-title-3); }
+    &[data-variant="title-3-emphasized"] { font: var(--sjse-typography-title-3-emphasized); }
+    &[data-variant="headline"] { font: var(--sjse-typography-headline); }
+    &[data-variant="body"] { font: var(--sjse-typography-body); }
+    &[data-variant="body-emphasized"] { font: var(--sjse-typography-body-emphasized); }
+    &[data-variant="body-italic"] { font: var(--sjse-typography-body-italic); }
+    &[data-variant="subheadline"] { font: var(--sjse-typography-subheadline); }
+    &[data-variant="subheadline-emphasized"] { font: var(--sjse-typography-subheadline-emphasized); }
+    &[data-variant="footnote"] { font: var(--sjse-typography-footnote); }
+    &[data-variant="footnote-emphasized"] { font: var(--sjse-typography-footnote-emphasized); }
+    &[data-variant="caption-1"] { font: var(--sjse-typography-caption-1); }
+    &[data-variant="caption-1-emphasized"] { font: var(--sjse-typography-caption-1-emphasized); }
+    &[data-variant="caption-2"] { font: var(--sjse-typography-caption-2); }
+    &[data-variant="caption-2-emphasized"] { font: var(--sjse-typography-caption-2-emphasized); }
+    &[data-color="primary"] { color: var(--sjse-color-text-primary); }
+    &[data-color="secondary"] { color: var(--sjse-color-text-secondary); }
+    &[data-color="tertiary"] { color: var(--sjse-color-text-tertiary); }
+    &[data-color="error"] { color: var(--sjse-color-text-error); }
+  }
+}

@@ -1,0 +1,26 @@
+.sj-spinner {
+  --sj-spinner-size: calc(24rem / var(--sjse-base-value));
+  display: inline-block;
+  inline-size: var(--sj-spinner-size);
+  block-size: var(--sj-spinner-size);
+  border-radius: 50%;
+  border: calc(3rem / var(--sjse-base-value)) solid currentColor;
+  border-inline-end-color: transparent;
+  animation: sj-spin 0.8s linear infinite;
+
+  &[data-size="small"] {
+    --sj-spinner-size: calc(20rem / var(--sjse-base-value));
+  }
+}
+
+@keyframes sj-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sj-spinner {
+    animation-duration: 2.4s;
+  }
+}

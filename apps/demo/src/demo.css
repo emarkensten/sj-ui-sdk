@@ -1,0 +1,15 @@
+/* Demo page layout only. Unlayered, so it beats the library on purpose. */
+body {
+  margin: 0;
+  background: var(--sjse-color-background-primary);
+  color: var(--sjse-color-text-primary);
+  font: var(--sjse-typography-body);
+}
+.page { max-width: 600px; margin: 0 auto; padding: 24px 16px 64px; }
+.stack { display: grid; gap: 16px; }
+.stack > section + section, .page > .stack > * + section { margin-top: 8px; }
+.list { display: grid; gap: 8px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.header { justify-content: space-between; margin-bottom: 24px; }
+.link { all: unset; cursor: pointer; text-decoration: underline; font: var(--sjse-typography-subheadline); }
+.link:focus-visible { outline: 2px solid var(--sjse-color-border-focused); outline-offset: 2px; }
